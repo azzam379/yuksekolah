@@ -6,7 +6,7 @@ const features = [
   {
     icon: <Smartphone className="w-8 h-8" />,
     title: "Responsif Total",
-    desc: "Akses dari smartphone, tablet, atau laptop dengan tampilan optimal.",
+    desc: "Akses dari smartphone, tablet, atau laptop dengan tampilan optimal dan menarik.",
     stat: "100% Mobile-Friendly"
   },
   {

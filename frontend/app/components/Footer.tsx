@@ -11,7 +11,7 @@ const footerLinks = {
     { label: 'Untuk Sekolah', href: '#sekolah' },
     { label: 'Untuk Siswa', href: '#siswa' },
     { label: 'Fitur', href: '#fitur' },
-    { label: 'Harga', href: '/harga' },
+    { label: 'Biaya', href: '/harga' },
     { label: 'Demo', href: '/demo' }
   ],
   Perusahaan: [
