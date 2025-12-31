@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { ArrowRight, ArrowLeft, CheckCircle, School, User, ShieldCheck, Clock, Check, AlertCircle } from 'lucide-react'
 
 interface FormData {
   school_name: string
@@ -129,90 +130,99 @@ export default function SchoolRegistrationPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[url('/grid-pattern.svg')] bg-cover bg-center py-12 px-4 sm:px-6 lg:px-8 relative">
+      {/* Ambient Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-primary-50 via-white to-secondary-50 opacity-90 -z-10"></div>
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary-200/30 rounded-full blur-[100px] -z-10"></div>
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-secondary-200/30 rounded-full blur-[100px] -z-10"></div>
+
+      <div className="max-w-4xl mx-auto">
         {/* Header */}
-        <div className="text-center mb-12">
-          <Link href="/" className="inline-flex items-center text-primary-600 hover:text-primary-700 mb-6">
-            <span className="text-lg">←</span>
-            <span className="ml-2">Kembali ke Beranda</span>
+        <div className="text-center mb-12 animate-fade-in-up">
+          <Link href="/" className="inline-flex items-center text-gray-500 hover:text-primary-600 mb-8 transition-colors group bg-white/50 backdrop-blur-sm px-4 py-2 rounded-full border border-gray-100 shadow-sm">
+            <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+            <span className="text-sm font-medium">Kembali ke Beranda</span>
           </Link>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-6 tracking-tight">
             Daftarkan Sekolah Anda
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Bergabung dengan ratusan sekolah yang sudah memanfaatkan platform digital
-            untuk proses pendaftaran siswa yang lebih efisien.
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Bergabung dengan ekosistem pendidikan digital modern.
+            <span className="hidden sm:inline"> Kelola pendaftaran siswa dengan lebih efisien dan profesional.</span>
           </p>
         </div>
 
         {/* Progress Steps */}
-        <div className="mb-8">
-          <div className="flex items-center justify-center mb-6">
-            {[1, 2, 3].map((step) => (
-              <div key={step} className="flex items-center">
-                <div className={`
-                  w-10 h-10 rounded-full flex items-center justify-center font-bold
-                  ${currentStep === step ? 'bg-primary-600 text-white' :
-                    currentStep > step ? 'bg-green-500 text-white' :
-                      'bg-gray-200 text-gray-500'}
-                `}>
-                  {currentStep > step ? '✓' : step}
-                </div>
-                {step < 3 && (
-                  <div className={`
-                    w-24 h-1 mx-2
-                    ${currentStep > step ? 'bg-green-500' : 'bg-gray-200'}
-                  `} />
-                )}
+        <div className="mb-10 max-w-2xl mx-auto">
+          <div className="relative flex items-center justify-between z-0">
+            {/* Connector Line */}
+            <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-200 -z-10 rounded-full"></div>
+            <div
+              className="absolute top-1/2 left-0 h-1 bg-gradient-to-r from-primary-500 to-blue-500 -z-10 rounded-full transition-all duration-500 ease-in-out"
+              style={{ width: `${((currentStep - 1) / 2) * 100}%` }}
+            ></div>
+
+            {/* Step 1 */}
+            <div className={`relative flex flex-col items-center group ${currentStep >= 1 ? 'text-primary-700' : 'text-gray-400'}`}>
+              <div className={`
+                 w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg border-4 transition-all duration-300 shadow-lg
+                 ${currentStep >= 1 ? 'bg-white border-primary-500 text-primary-600 scale-110' : 'bg-gray-100 border-gray-200 text-gray-400'}
+                 ${currentStep > 1 ? '!bg-primary-500 !border-primary-500 !text-white' : ''}
+               `}>
+                {currentStep > 1 ? <Check className="w-6 h-6" /> : <School className="w-5 h-5" />}
               </div>
-            ))}
-          </div>
-          <div className="flex justify-center text-sm text-gray-600">
-            <div className="w-32 text-center">Data Sekolah</div>
-            <div className="w-32 text-center mx-8">Data Admin</div>
-            <div className="w-32 text-center">Selesai</div>
+              <span className="mt-3 text-sm font-bold bg-white/50 backdrop-blur px-2 py-1 rounded-lg">Data Sekolah</span>
+            </div>
+
+            {/* Step 2 */}
+            <div className={`relative flex flex-col items-center group ${currentStep >= 2 ? 'text-primary-700' : 'text-gray-400'}`}>
+              <div className={`
+                 w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg border-4 transition-all duration-300 shadow-lg
+                 ${currentStep >= 2 ? 'bg-white border-primary-500 text-primary-600 scale-110' : 'bg-gray-100 border-gray-200 text-gray-400'}
+                 ${currentStep > 2 ? '!bg-primary-500 !border-primary-500 !text-white' : ''}
+               `}>
+                {currentStep > 2 ? <Check className="w-6 h-6" /> : <User className="w-5 h-5" />}
+              </div>
+              <span className="mt-3 text-sm font-bold bg-white/50 backdrop-blur px-2 py-1 rounded-lg">Admin</span>
+            </div>
+
+            {/* Step 3 */}
+            <div className={`relative flex flex-col items-center group ${currentStep >= 3 ? 'text-green-600' : 'text-gray-400'}`}>
+              <div className={`
+                 w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg border-4 transition-all duration-300 shadow-lg
+                 ${currentStep >= 3 ? 'bg-green-500 border-green-500 text-white scale-110' : 'bg-gray-100 border-gray-200 text-gray-400'}
+               `}>
+                <CheckCircle className="w-5 h-5" />
+              </div>
+              <span className="mt-3 text-sm font-bold bg-white/50 backdrop-blur px-2 py-1 rounded-lg">Selesai</span>
+            </div>
           </div>
         </div>
 
         {/* Form Container */}
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+        <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] shadow-2xl border border-white/50 overflow-hidden relative animate-fade-in-up animation-delay-300">
+          {/* Decorative top border */}
+          <div className="h-2 w-full bg-gradient-to-r from-primary-500 via-blue-500 to-secondary-500"></div>
+
           {error && (
-            <div className="bg-red-50 border-l-4 border-red-400 p-4 mx-6 mt-6">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <span className="text-red-400">⚠️</span>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-red-700">{error}</p>
-                </div>
-              </div>
+            <div className="mx-6 mt-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start animate-shake">
+              <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 mr-3 flex-shrink-0" />
+              <p className="text-sm text-red-700 font-medium">{error}</p>
             </div>
           )}
 
-          {success && (
-            <div className="bg-green-50 border-l-4 border-green-400 p-4 mx-6 mt-6">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <span className="text-green-400">✅</span>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-green-700">
-                    Pendaftaran berhasil! Data sekolah Anda sedang diproses.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          <div className="p-6 md:p-10">
+          <div className="p-8 md:p-12">
             {/* Step 1: School Information */}
             {currentStep === 1 && (
-              <div className="animate-fadeIn">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Informasi Sekolah</h2>
+              <div className="animate-fade-in space-y-8">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Informasi Sekolah</h2>
+                  <p className="text-gray-500">Lengkapi data identitas sekolah Anda.</p>
+                </div>
+
                 <div className="space-y-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Nama Sekolah <span className="text-red-500">*</span>
                     </label>
                     <input
@@ -220,7 +230,7 @@ export default function SchoolRegistrationPage() {
                       name="school_name"
                       value={formData.school_name}
                       onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                      className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all font-medium text-gray-900 placeholder:text-gray-400"
                       placeholder="Contoh: SMA Negeri 1 Jakarta"
                       required
                     />
@@ -228,7 +238,7 @@ export default function SchoolRegistrationPage() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
                         Email Sekolah <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -236,17 +246,14 @@ export default function SchoolRegistrationPage() {
                         name="school_email"
                         value={formData.school_email}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all font-medium text-gray-900 placeholder:text-gray-400"
                         placeholder="info@sekolah.sch.id"
                         required
                       />
-                      <p className="mt-1 text-xs text-gray-500">
-                        Gunakan email resmi sekolah jika ada
-                      </p>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
                         Nomor Telepon <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -254,7 +261,7 @@ export default function SchoolRegistrationPage() {
                         name="school_phone"
                         value={formData.school_phone}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all font-medium text-gray-900 placeholder:text-gray-400"
                         placeholder="021-1234567"
                         required
                       />
@@ -262,26 +269,27 @@ export default function SchoolRegistrationPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Alamat Lengkap Sekolah <span className="text-red-500">*</span>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Alamat Lengkap <span className="text-red-500">*</span>
                     </label>
                     <textarea
                       name="school_address"
                       value={formData.school_address}
                       onChange={handleChange}
                       rows={3}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="Jl. Contoh No. 123, Kota, Provinsi"
+                      className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all font-medium text-gray-900 placeholder:text-gray-400 resize-none"
+                      placeholder="Jalan, Kota, Provinsi, Kode Pos..."
                       required
                     />
                   </div>
 
-                  <div className="pt-4">
+                  <div className="pt-6 flex justify-end">
                     <button
                       onClick={handleNext}
-                      className="w-full md:w-auto px-8 py-3 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                      className="w-full md:w-auto px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-blue-500/30 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center group"
                     >
-                      Lanjut ke Data Admin →
+                      Lanjut ke Data Admin
+                      <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </button>
                   </div>
                 </div>
@@ -290,51 +298,48 @@ export default function SchoolRegistrationPage() {
 
             {/* Step 2: Admin Information */}
             {currentStep === 2 && (
-              <div className="animate-fadeIn">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Data Admin Penanggung Jawab</h2>
-                <p className="text-gray-600 mb-6">
-                  Admin ini akan memiliki akses penuh ke dashboard sekolah.
-                </p>
+              <div className="animate-fade-in space-y-8">
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Data Admin Penanggung Jawab</h2>
+                  <p className="text-gray-500">Akun ini akan menjadi Super Admin untuk dashboard sekolah.</p>
+                </div>
 
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Nama Lengkap Admin <span className="text-red-500">*</span>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Nama Lengkap <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
                         name="admin_name"
                         value={formData.admin_name}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                        placeholder="Nama penanggung jawab"
+                        className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all font-medium text-gray-900"
+                        placeholder="Nama Admin"
                         required
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Email Admin <span className="text-red-500">*</span>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Email Login <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="email"
                         name="admin_email"
                         value={formData.admin_email}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all font-medium text-gray-900"
                         placeholder="admin@sekolah.sch.id"
                         required
                       />
-                      <p className="mt-1 text-xs text-gray-500">
-                        Untuk login ke dashboard
-                      </p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
                         Password <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -342,14 +347,14 @@ export default function SchoolRegistrationPage() {
                         name="admin_password"
                         value={formData.admin_password}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                        placeholder="Minimal 8 karakter"
+                        className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all font-medium text-gray-900"
+                        placeholder="Min. 8 karakter"
                         required
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
                         Konfirmasi Password <span className="text-red-500">*</span>
                       </label>
                       <input
@@ -357,58 +362,61 @@ export default function SchoolRegistrationPage() {
                         name="confirm_password"
                         value={formData.confirm_password}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                        className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-primary-100 focus:border-primary-500 transition-all font-medium text-gray-900"
                         placeholder="Ulangi password"
                         required
                       />
                     </div>
                   </div>
 
-                  <div className="flex items-start pt-4">
-                    <input
-                      type="checkbox"
-                      id="terms_accepted"
-                      name="terms_accepted"
-                      checked={formData.terms_accepted}
-                      onChange={handleChange}
-                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded mt-1"
-                    />
-                    <label htmlFor="terms_accepted" className="ml-3 text-sm text-gray-700">
-                      Saya menyetujui{' '}
-                      <Link href="/syarat-ketentuan" className="text-primary-600 hover:text-primary-500">
-                        Syarat & Ketentuan
-                      </Link>{' '}
-                      dan{' '}
-                      <Link href="/kebijakan-privasi" className="text-primary-600 hover:text-primary-500">
-                        Kebijakan Privasi
-                      </Link>{' '}
-                      Yuksekolah. Saya juga menyatakan bahwa data yang saya berikan adalah benar dan sah.
-                    </label>
+                  <div className="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                    <div className="flex items-start">
+                      <div className="flex items-center h-5">
+                        <input
+                          type="checkbox"
+                          id="terms_accepted"
+                          name="terms_accepted"
+                          checked={formData.terms_accepted}
+                          onChange={handleChange}
+                          className="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500 transition-all cursor-pointer"
+                        />
+                      </div>
+                      <div className="ml-3 text-sm">
+                        <label htmlFor="terms_accepted" className="font-medium text-gray-700 cursor-pointer">
+                          Saya menyetujui <span className="text-blue-600 hover:text-blue-700">Syarat & Ketentuan</span> serta <span className="text-blue-600 hover:text-blue-700">Kebijakan Privasi</span>.
+                        </label>
+                        <p className="text-gray-500 mt-1">Data yang saya berikan adalah benar dan dapat dipertanggungjawabkan.</p>
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="flex flex-col md:flex-row gap-4 pt-4">
+                  <div className="flex flex-col md:flex-row gap-4 pt-6">
                     <button
                       type="button"
                       onClick={handleBack}
-                      className="px-8 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition"
+                      className="px-8 py-4 border-2 border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center justify-center"
                     >
-                      ← Kembali
+                      <ArrowLeft className="w-5 h-5 mr-2" />
+                      Kembali
                     </button>
                     <button
                       onClick={handleSubmit}
-                      disabled={isLoading}
-                      className="flex-1 px-8 py-3 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                      disabled={isLoading || !formData.terms_accepted}
+                      className="flex-1 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg hover:shadow-blue-500/30 hover:-translate-y-1 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none bg-[length:200%_auto] hover:bg-right"
                     >
                       {isLoading ? (
-                        <span className="flex items-center justify-center">
+                        <>
                           <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                           </svg>
-                          Memproses...
-                        </span>
+                          Memproses Pendaftaran...
+                        </>
                       ) : (
-                        'Daftarkan Sekolah'
+                        <>
+                          Daftarkan Sekolah Sekarang
+                          <ArrowRight className="ml-2 w-5 h-5" />
+                        </>
                       )}
                     </button>
                   </div>
@@ -418,43 +426,50 @@ export default function SchoolRegistrationPage() {
 
             {/* Step 3: Success */}
             {currentStep === 3 && registrationResult && (
-              <div className="animate-fadeIn text-center py-10">
-                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="text-3xl text-green-600">✅</span>
+              <div className="animate-fade-in text-center py-8">
+                <div className="relative inline-block mb-8">
+                  <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center animate-bounce-slow">
+                    <CheckCircle className="w-12 h-12 text-green-600" />
+                  </div>
+                  <div className="absolute top-0 right-0 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center animate-ping"></div>
                 </div>
 
-                <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                  Pendaftaran Berhasil!
+                <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">
+                  Pendaftaran Berhasil! 🎉
                 </h2>
 
-                <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-                  Data sekolah <span className="font-semibold">{formData.school_name}</span> telah diterima.
-                  Tim kami akan melakukan verifikasi dalam 1x24 jam.
+                <p className="text-lg text-gray-600 mb-10 max-w-2xl mx-auto">
+                  Selamat! Data sekolah <span className="font-bold text-gray-900">{formData.school_name}</span> telah kami terima.
+                  Tim kami akan melakukan verifikasi secepatnya.
                 </p>
 
-                <div className="bg-gray-50 rounded-xl p-6 mb-8 max-w-2xl mx-auto">
-                  <h3 className="font-bold text-gray-900 mb-4">Informasi Akun Anda</h3>
-                  <div className="space-y-3 text-left">
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Nama Sekolah:</span>
-                      <span className="font-medium">{registrationResult.school?.name}</span>
+                <div className="bg-gradient-to-br from-gray-50 to-white rounded-2xl p-8 mb-10 max-w-2xl mx-auto border border-gray-100 shadow-inner">
+                  <div className="flex items-center justify-between mb-6 border-b border-gray-100 pb-4">
+                    <h3 className="font-bold text-gray-900 flex items-center">
+                      <ShieldCheck className="w-5 h-5 mr-2 text-primary-600" />
+                      Detail Akun
+                    </h3>
+                    <span className="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-bold uppercase tracking-wide flex items-center">
+                      <Clock className="w-3 h-3 mr-1" />
+                      Menunggu Verifikasi
+                    </span>
+                  </div>
+
+                  <div className="space-y-4 text-left">
+                    <div className="flex justify-between items-center p-3 bg-white rounded-xl border border-gray-50 shadow-sm">
+                      <span className="text-gray-500 font-medium text-sm">Nama Sekolah</span>
+                      <span className="font-bold text-gray-900">{registrationResult.school?.name}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Email Admin:</span>
-                      <span className="font-medium">{registrationResult.admin?.email}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-600">Status:</span>
-                      <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">
-                        Menunggu Verifikasi
-                      </span>
+                    <div className="flex justify-between items-center p-3 bg-white rounded-xl border border-gray-50 shadow-sm">
+                      <span className="text-gray-500 font-medium text-sm">Email Admin</span>
+                      <span className="font-bold text-gray-900">{registrationResult.admin?.email}</span>
                     </div>
                   </div>
 
-                  <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-100">
-                    <p className="text-sm text-yellow-800">
-                      <span className="font-semibold">Perhatian:</span> Anda akan menerima email konfirmasi
-                      setelah akun diverifikasi oleh tim super admin. Proses verifikasi biasanya memakan waktu 1-2 hari kerja.
+                  <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-100 flex items-start text-left">
+                    <div className="text-blue-600 mt-0.5 mr-3">ℹ️</div>
+                    <p className="text-sm text-blue-800 leading-snug">
+                      Cek email inbox/spam Anda secara berkala. Kami akan mengirimkan notifikasi setelah akun diverifikasi (estimasi 1x24 jam).
                     </p>
                   </div>
                 </div>
@@ -462,64 +477,55 @@ export default function SchoolRegistrationPage() {
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Link
                     href="/login"
-                    className="px-8 py-3 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition"
+                    className="px-10 py-4 bg-primary-600 hover:bg-primary-700 text-white font-bold rounded-xl shadow-lg hover:shadow-primary-500/30 transition-all flex items-center justify-center transform hover:-translate-y-1"
                   >
-                    Login ke Dashboard
+                    Masuk ke Dashboard
                   </Link>
                   <Link
                     href="/"
-                    className="px-8 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition"
+                    className="px-10 py-4 border-2 border-gray-200 text-gray-700 font-bold rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all flex items-center justify-center"
                   >
                     Kembali ke Beranda
                   </Link>
                 </div>
 
-                <div className="mt-10 pt-8 border-t border-gray-200">
-                  <p className="text-sm text-gray-500">
-                    Butuh bantuan? Hubungi kami di{' '}
-                    <a href="mailto:support@yuksekolah.id" className="text-primary-600 hover:text-primary-500">
-                      support@yuksekolah.id
-                    </a>{' '}
-                    atau telepon{' '}
-                    <a href="tel:+622112345678" className="text-primary-600 hover:text-primary-500">
-                      021-1234-5678
-                    </a>
-                  </p>
-                </div>
+                <p className="mt-12 text-sm text-gray-400">
+                  Butuh bantuan mendesak? <a href="#" className="text-blue-600 hover:underline">Hubungi Support</a>
+                </p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Benefits Section */}
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="text-center p-6">
-            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        {/* Floating Benefits */}
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in-up animation-delay-500">
+          <div className="bg-white/40 backdrop-blur-md p-6 rounded-2xl border border-white/40 hover:bg-white/60 transition-colors cursor-default group">
+            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <span className="text-blue-600 text-xl">⚡</span>
             </div>
-            <h4 className="font-bold text-gray-900 mb-2">Proses Cepat</h4>
+            <h4 className="font-bold text-gray-900 mb-2">Proses Kilat</h4>
             <p className="text-sm text-gray-600">
-              Verifikasi dalam 24 jam, langsung dapat dashboard
+              Verifikasi &lt; 24 jam. Langsung bisa terima siswa.
             </p>
           </div>
 
-          <div className="text-center p-6">
-            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <div className="bg-white/40 backdrop-blur-md p-6 rounded-2xl border border-white/40 hover:bg-white/60 transition-colors cursor-default group">
+            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <span className="text-green-600 text-xl">🆓</span>
             </div>
             <h4 className="font-bold text-gray-900 mb-2">Gratis 30 Hari</h4>
             <p className="text-sm text-gray-600">
-              Coba semua fitur tanpa biaya di bulan pertama
+              Full akses ke semua fitur premium tanpa komitmen.
             </p>
           </div>
 
-          <div className="text-center p-6">
-            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-purple-600 text-xl">🎯</span>
+          <div className="bg-white/40 backdrop-blur-md p-6 rounded-2xl border border-white/40 hover:bg-white/60 transition-colors cursor-default group">
+            <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <span className="text-purple-600 text-xl">🤝</span>
             </div>
-            <h4 className="font-bold text-gray-900 mb-2">Dukungan Lengkap</h4>
+            <h4 className="font-bold text-gray-900 mb-2">Bantuan 24/7</h4>
             <p className="text-sm text-gray-600">
-              Tim support siap membantu 24/7
+              Tim support berdedikasi siap membantu Anda.
             </p>
           </div>
         </div>
