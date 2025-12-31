@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowRight, Shield, Users, CheckCircle, Rocket } from 'lucide-react'
+import { ArrowRight, Shield, Users, CheckCircle, Rocket, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 
 export default function Hero() {
@@ -38,7 +38,7 @@ export default function Hero() {
               </span>
             </h1>
 
-            <p className="text-lg text-gray-600 mb-10 md:text-xl leading-relaxed max-w-lg">
+            <p className="text-lg text-gray-700 mb-10 md:text-xl leading-relaxed max-w-lg">
               Solusi pendaftaran PPDB digital #1 di Indonesia. Kelola data siswa, pembayaran, dan seleksi dalam satu dashboard pintar.
             </p>
 
@@ -54,6 +54,17 @@ export default function Hero() {
                 </div>
               </Link>
 
+              <a
+                href="https://wa.me/6281779203711?text=Halo%20Tim%20Sales%20Yuksekolah%2C%20saya%20tertarik%20untuk%20mengetahui%20lebih%20lanjut%20tentang%20platform%20Anda."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group px-8 py-4 bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-100 rounded-2xl font-bold text-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1 flex items-center justify-center"
+              >
+                <MessageCircle className="mr-2 w-5 h-5 text-gray-500 group-hover:text-primary-600 transition-colors" />
+                Hubungi Tim Sales
+              </a>
+
+
             </div>
 
             {/* Partner logos */}
@@ -61,7 +72,7 @@ export default function Hero() {
               <p className="text-gray-500 text-sm font-medium mb-4 uppercase tracking-wider">Dipercaya oleh institusi terbaik:</p>
               <div className="flex flex-wrap gap-x-8 gap-y-4 opacity-70 grayscale hover:grayscale-0 transition-all duration-500">
                 {['Al-Azhar', 'Penabur', 'Negeri 1', 'Global School'].map((name, i) => (
-                  <span key={i} className="text-lg font-bold text-gray-400 hover:text-primary-600 transition-colors cursor-default">{name}</span>
+                  <span key={i} className="text-lg font-bold text-gray-500 hover:text-primary-600 transition-colors cursor-default">{name}</span>
                 ))}
               </div>
             </div>

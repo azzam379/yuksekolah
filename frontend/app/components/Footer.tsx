@@ -57,11 +57,11 @@ export default function Footer() {
               </div>
               <div>
                 <h3 className="text-2xl font-bold tracking-tight">Yuksekolah</h3>
-                <p className="text-gray-400 text-sm">Platform Pendaftaran Digital</p>
+                <p className="text-gray-300 text-sm">Platform Pendaftaran Digital</p>
               </div>
             </div>
 
-            <p className="text-gray-400 leading-relaxed">
+            <p className="text-gray-300 leading-relaxed">
               Membantu sekolah Indonesia bertransformasi digital dengan solusi
               pendaftaran siswa baru yang cepat, aman, dan efisien.
             </p>
@@ -92,7 +92,7 @@ export default function Footer() {
                   <li key={i}>
                     <Link
                       href={link.href}
-                      className="text-gray-400 hover:text-primary-400 transition-colors duration-200 block text-sm"
+                      className="text-gray-300 hover:text-primary-400 transition-colors duration-200 block text-sm"
                     >
                       {link.label}
                     </Link>
@@ -110,8 +110,8 @@ export default function Footer() {
               <Phone className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-sm text-gray-400 mb-1">Hubungi Kami</div>
-              <div className="font-semibold text-lg hover:text-primary-400 transition-colors cursor-pointer">021-1234-5678</div>
+              <div className="text-sm text-gray-300 mb-1">Hubungi Kami</div>
+              <div className="font-semibold text-lg hover:text-primary-400 transition-colors cursor-pointer text-white">021-1234-5678</div>
             </div>
           </div>
 
@@ -120,8 +120,8 @@ export default function Footer() {
               <Mail className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-sm text-gray-400 mb-1">Email Kami</div>
-              <div className="font-semibold text-lg hover:text-secondary-400 transition-colors cursor-pointer">hello@yuksekolah.id</div>
+              <div className="text-sm text-gray-300 mb-1">Email Kami</div>
+              <div className="font-semibold text-lg hover:text-secondary-400 transition-colors cursor-pointer text-white">hello@yuksekolah.id</div>
             </div>
           </div>
 
@@ -130,8 +130,8 @@ export default function Footer() {
               <MapPin className="w-6 h-6" />
             </div>
             <div>
-              <div className="text-sm text-gray-400 mb-1">Lokasi Kantor</div>
-              <div className="font-semibold text-lg">Jakarta, Indonesia</div>
+              <div className="text-sm text-gray-300 mb-1">Lokasi Kantor</div>
+              <div className="font-semibold text-lg text-white">Jakarta, Indonesia</div>
             </div>
           </div>
         </div>

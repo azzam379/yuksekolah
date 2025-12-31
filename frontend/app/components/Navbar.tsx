@@ -40,9 +40,9 @@ export default function Navbar() {
 
           {/* Menu Desktop */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="/" className="text-gray-600 hover:text-primary-600 font-medium transition-colors">Beranda</Link>
-            <Link href="#sekolah" className="text-gray-600 hover:text-primary-600 font-medium transition-colors">Untuk Sekolah</Link>
-            <Link href="#siswa" className="text-gray-600 hover:text-primary-600 font-medium transition-colors">Untuk Siswa</Link>
+            <Link href="/" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Beranda</Link>
+            <Link href="#sekolah" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Untuk Sekolah</Link>
+            <Link href="#siswa" className="text-gray-700 hover:text-primary-600 font-medium transition-colors">Untuk Siswa</Link>
           </div>
 
           {/* Tombol Aksi Desktop */}

@@ -1,6 +1,6 @@
 'use client'
 
-import { Smartphone, Bell, Lock, Zap, Cloud, Users, ArrowRight } from 'lucide-react'
+import { Smartphone, Bell, Lock, Zap, Cloud, Users, ArrowRight, MessageCircle } from 'lucide-react'
 import Link from 'next/link'
 
 const features = [
@@ -60,7 +60,7 @@ export default function Features() {
               Yuksekolah?
             </span>
           </h2>
-          <p className="text-gray-600 text-xl leading-relaxed">
+          <p className="text-gray-700 text-xl leading-relaxed">
             Platform lengkap dengan segala fitur yang sekolah dan siswa butuhkan
             untuk proses pendaftaran yang <span className="font-semibold text-primary-600">smooth</span> dan <span className="font-semibold text-secondary-600">efisien</span>.
           </p>
@@ -81,7 +81,7 @@ export default function Features() {
               </div>
 
               <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-primary-700 transition-colors">{feature.title}</h3>
-              <p className="text-gray-600 mb-6 leading-relaxed delay-75">{feature.desc}</p>
+              <p className="text-gray-700 mb-6 leading-relaxed delay-75">{feature.desc}</p>
 
               <div className="flex items-center justify-between mt-auto pt-4 border-t border-gray-50">
                 <div className="inline-block px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-bold uppercase tracking-wider group-hover:bg-primary-50 group-hover:text-primary-700 transition-colors">
@@ -103,7 +103,7 @@ export default function Features() {
             <h3 className="text-3xl md:text-4xl font-extrabold text-white mb-6">
               Siap Transformasi Sekolah Anda?
             </h3>
-            <p className="text-blue-100 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
+            <p className="text-blue-50 text-lg md:text-xl mb-10 max-w-2xl mx-auto">
               Bergabung dengan hundreds sekolah modern lainnya. Setup instan, tanpa biaya tersembunyi.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -111,9 +111,15 @@ export default function Features() {
                 Jadwalkan Demo Gratis
                 <ArrowRight className="ml-2 w-5 h-5 text-primary-600 group-hover:translate-x-1 transition-transform" />
               </button>
-              <Link href="/kontak" className="px-8 py-4 bg-transparent border border-white/30 text-white rounded-2xl font-bold text-lg hover:bg-white/10 transition-all">
+              <a
+                href="https://wa.me/6281779203711?text=Halo%20Tim%20Sales%20Yuksekolah%2C%20saya%20tertarik%20untuk%20mengetahui%20lebih%20lanjut%20tentang%20platform%20Anda."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-8 py-4 bg-transparent border border-white/30 text-white rounded-2xl font-bold text-lg hover:bg-white/10 transition-all flex items-center justify-center cursor-pointer"
+              >
+                <MessageCircle className="mr-2 w-5 h-5" />
                 Hubungi Tim Sales
-              </Link>
+              </a>
             </div>
           </div>
         </div>

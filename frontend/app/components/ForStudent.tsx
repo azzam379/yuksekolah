@@ -37,11 +37,11 @@ export default function ForStudent() {
               Daftar Sekolah Jadi
               <span className="block text-secondary-600">Lebih Cepat & Praktis</span>
             </h2>
-            <p className="text-gray-600 text-lg mb-8">
-              Tidak perlu datang ke sekolah, tidak perlu fotokopi berkas berlembar-lembar. 
+            <p className="text-gray-700 text-lg mb-8">
+              Tidak perlu datang ke sekolah, tidak perlu fotokopi berkas berlembar-lembar.
               Semua proses digital dari genggaman tangan Anda.
             </p>
-            
+
             <div className="space-y-6">
               {steps.map((item, index) => (
                 <div key={index} className="flex items-start">
@@ -52,7 +52,7 @@ export default function ForStudent() {
                   </div>
                   <div>
                     <h4 className="text-lg font-semibold text-gray-900">{item.title}</h4>
-                    <p className="text-gray-600 mb-1">{item.desc}</p>
+                    <p className="text-gray-700 mb-1">{item.desc}</p>
                     <div className="flex items-center text-sm text-gray-500">
                       <CheckCircle className="w-4 h-4 mr-1" />
                       <span>Selesai dalam {item.time}</span>
@@ -61,7 +61,7 @@ export default function ForStudent() {
                 </div>
               ))}
             </div>
-            
+
             <div className="mt-10 p-6 bg-gradient-to-r from-primary-50 to-secondary-50 rounded-2xl border border-primary-100">
               <div className="flex items-center">
                 <div className="text-3xl mr-4">💡</div>
@@ -74,11 +74,11 @@ export default function ForStudent() {
               </div>
             </div>
           </div>
-          
+
           {/* Right - Stats Card */}
           <div className="bg-gradient-to-br from-gray-900 to-gray-800 rounded-3xl p-8 text-white">
             <h3 className="text-2xl font-bold mb-6">Manfaat Digitalisasi</h3>
-            
+
             <div className="space-y-6 mb-8">
               <div>
                 <div className="flex justify-between mb-1">
@@ -89,7 +89,7 @@ export default function ForStudent() {
                   <div className="h-full bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full w-3/4"></div>
                 </div>
               </div>
-              
+
               <div>
                 <div className="flex justify-between mb-1">
                   <span>Pengurangan Kesalahan Data</span>
@@ -99,7 +99,7 @@ export default function ForStudent() {
                   <div className="h-full bg-gradient-to-r from-primary-500 to-secondary-500 rounded-full w-9/10"></div>
                 </div>
               </div>
-              
+
               <div>
                 <div className="flex justify-between mb-1">
                   <span>Kepuasan Calon Siswa</span>
@@ -110,7 +110,7 @@ export default function ForStudent() {
                 </div>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div className="text-center p-4 bg-gray-800 rounded-xl">
                 <div className="text-3xl font-bold">24/7</div>
