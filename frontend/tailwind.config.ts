@@ -10,17 +10,17 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          500: '#3b82f6',
-          600: '#2563eb',  // Biru utama
+          50: '#ecfdf5',  // Slight tint shift
+          100: '#d1fae5',
+          500: '#3b82f6', // Bright Blue
+          600: '#2563eb', // Deep Blue (Main)
           700: '#1d4ed8',
         },
         secondary: {
-          50: '#fdf2f8',
-          500: '#ec4899',
-          600: '#db2777',  // Magenta
-          700: '#be185d',
+          50: '#fffbeb',
+          500: '#f59e0b', // Amber/Gold (Main)
+          600: '#d97706', // Darker Amber
+          700: '#b45309',
         }
       },
       backgroundImage: {
@@ -29,17 +29,17 @@ const config: Config = {
       animation: {
         'float': 'float 6s ease-in-out infinite',
         'fade-in': 'fadeIn 0.5s ease-out'
+      },
+      keyframes: {
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-20px)' }
         },
-        keyframes: {
-            float: {
-            '0%, 100%': { transform: 'translateY(0)' },
-            '50%': { transform: 'translateY(-20px)' }
-    },
         fadeIn: {
-            '0%': { opacity: '0', transform: 'translateY(10px)' },
-            '100%': { opacity: '1', transform: 'translateY(0)' }
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' }
         }
-    }
+      }
     },
   },
   plugins: [],
