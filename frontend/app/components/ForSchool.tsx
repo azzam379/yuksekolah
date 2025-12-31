@@ -64,7 +64,7 @@ export default function ForSchool() {
         <div className="text-center">
           <Link
             href="/daftar-sekolah"
-            className="inline-flex items-center bg-gradient-to-r from-primary-600 to-secondary-600 text-black px-8 py-4 rounded-xl text-lg font-semibold hover:shadow-xl transition-all group"
+            className="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:shadow-xl transition-all group"
           >
             Daftarkan Sekolah Anda Sekarang
             <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform" />
