@@ -13,13 +13,13 @@ class DashboardController extends Controller
     public function schoolStats(Request $request)
     {
         $user = $request->user();
-        
+
         if (!$user->isSchoolAdmin()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
         $schoolId = $user->school_id;
-        
+
         $stats = [
             'total_registrations' => Registration::where('school_id', $schoolId)->count(),
             'pending_verification' => Registration::where('school_id', $schoolId)
@@ -45,6 +45,7 @@ class DashboardController extends Controller
         return response()->json([
             'stats' => $stats,
             'weekly_data' => $weeklyData,
+            'school_info' => $user->school, // Include school model
             'recent_registrations' => Registration::with('student')
                 ->where('school_id', $schoolId)
                 ->orderBy('created_at', 'desc')
@@ -57,7 +58,7 @@ class DashboardController extends Controller
     public function studentDashboard(Request $request)
     {
         $user = $request->user();
-        
+
         if (!$user->isStudent()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
@@ -78,7 +79,7 @@ class DashboardController extends Controller
     public function superAdminStats(Request $request)
     {
         $user = $request->user();
-        
+
         if (!$user->isSuperAdmin()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }

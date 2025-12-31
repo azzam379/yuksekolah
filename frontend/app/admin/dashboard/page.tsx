@@ -12,6 +12,11 @@ interface DashboardData {
     verified: number
     today_registrations: number
   }
+  school_info?: {
+    id: number
+    name: string
+    registration_link: string
+  }
   recent_registrations: any[]
 }
 
@@ -45,6 +50,25 @@ export default function SchoolAdminDashboard() {
 
     fetchStats()
   }, [token])
+
+  // Helper to get registration link
+  const getRegistrationLink = () => {
+    const link = data?.school_info?.registration_link;
+    if (!link) return '';
+
+    let token = link;
+    // If it looks like a URL, extract the last part
+    if (link.includes('/')) {
+      const parts = link.split('/');
+      token = parts[parts.length - 1];
+    }
+
+    // Construct full URL using current origin
+    if (typeof window !== 'undefined') {
+      return `${window.location.origin}/register/${token}`;
+    }
+    return '';
+  }
 
   if (isLoading) {
     return (
@@ -184,17 +208,36 @@ export default function SchoolAdminDashboard() {
 
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20 mb-6">
               <p className="text-xs text-indigo-200 uppercase tracking-widest font-semibold mb-1">Link Pendaftaran</p>
-              <div className="flex items-center justify-between">
-                <code className="text-sm font-mono text-white truncate mr-4">
-                  {typeof window !== 'undefined' ? `${window.location.origin}/register/SCH-${user?.id}` : '...loading'}
+              <div className="flex items-center justify-between gap-2">
+                <code className="text-sm font-mono text-white truncate flex-1 block">
+                  {getRegistrationLink() || 'Link belum tersedia (Belum diverifikasi)'}
                 </code>
-                <button className="text-xs bg-white text-indigo-600 px-3 py-1.5 rounded-lg font-bold hover:bg-indigo-50 transition-colors">
+                <button
+                  onClick={() => {
+                    const link = getRegistrationLink();
+                    if (link) {
+                      navigator.clipboard.writeText(link);
+                      alert('Link berhasil disalin!');
+                    }
+                  }}
+                  className="text-xs bg-white text-indigo-600 px-3 py-1.5 rounded-lg font-bold hover:bg-indigo-50 transition-colors flex-shrink-0"
+                  disabled={!getRegistrationLink()}
+                >
                   Copy
                 </button>
               </div>
             </div>
 
-            <button className="w-full py-3 bg-white text-indigo-700 rounded-xl font-bold text-sm shadow-md hover:shadow-lg hover:bg-indigo-50 transition-all transform hover:-translate-y-0.5">
+            <button
+              onClick={() => {
+                const link = getRegistrationLink();
+                if (link) {
+                  window.open(`https://wa.me/?text=Silakan daftar ke sekolah kami melalui link berikut: ${encodeURIComponent(link)}`, '_blank')
+                }
+              }}
+              className="w-full py-3 bg-white text-indigo-700 rounded-xl font-bold text-sm shadow-md hover:shadow-lg hover:bg-indigo-50 transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!getRegistrationLink()}
+            >
               Bagikan Link ke WhatsApp
             </button>
           </div>
