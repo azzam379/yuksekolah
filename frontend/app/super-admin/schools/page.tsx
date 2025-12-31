@@ -2,140 +2,158 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { Search, Building2, CheckCircle, XCircle, Clock } from 'lucide-react'
+import { Search, Filter, MoreHorizontal, School, CheckCircle2, XCircle, Clock, ExternalLink } from 'lucide-react'
 
-// Reuse types if possible, or define here
 interface School {
     id: number
     name: string
     email: string
-    status: 'pending' | 'active' | 'inactive' | 'rejected'
+    status: 'pending' | 'active' | 'inactive'
     created_at: string
-    phone?: string
-    address?: string
 }
 
-export default function SchoolsPage() {
+export default function SchoolManagementPage() {
     const { token } = useAuth()
     const [schools, setSchools] = useState<School[]>([])
     const [isLoading, setIsLoading] = useState(true)
-    const [search, setSearch] = useState('')
-    const [statusFilter, setStatusFilter] = useState<string>('all')
-
-    const fetchSchools = async () => {
-        try {
-            setIsLoading(true)
-            // We reusing the existing endpoint, but we might need to adjust it to support "all" statuses properly via query params
-            // Previously: Route::get('/schools', [SchoolController::class, 'index']) -> usually returns all for superadmin
-
-            const response = await fetch('http://localhost:8000/api/schools', {
-                headers: { 'Authorization': `Bearer ${token}` }
-            })
-            const data = await response.json()
-            // Ideally API should handle filtering, but for MVP client-side is fine if dataset < 1000
-            setSchools(data.data || data)
-        } catch (error) {
-            console.error('Error fetching schools:', error)
-        } finally {
-            setIsLoading(false)
-        }
-    }
+    const [searchTerm, setSearchTerm] = useState('')
+    const [statusFilter, setStatusFilter] = useState('all')
 
     useEffect(() => {
+        const fetchSchools = async () => {
+            setIsLoading(true)
+            try {
+                const response = await fetch('http://localhost:8000/api/schools', {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                if (response.ok) {
+                    const data = await response.json()
+                    setSchools(data.data || [])
+                } else {
+                    throw new Error('Gagal mengambil data sekolah')
+                }
+            } catch (e) {
+                console.error(e)
+                setSchools([])
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
         if (token) fetchSchools()
     }, [token])
 
-    // Client-side filtering
-    const filteredSchools = schools.filter(school => {
-        const matchesSearch = school.name.toLowerCase().includes(search.toLowerCase()) ||
-            school.email.toLowerCase().includes(search.toLowerCase())
-        const matchesStatus = statusFilter === 'all' || school.status === statusFilter
-
+    const filtered = schools.filter(s => {
+        const matchesSearch = s.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            s.email.toLowerCase().includes(searchTerm.toLowerCase())
+        const matchesStatus = statusFilter === 'all' || s.status === statusFilter
         return matchesSearch && matchesStatus
     })
 
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case 'active': return 'bg-green-100 text-green-800'
-            case 'pending': return 'bg-yellow-100 text-yellow-800'
-            case 'rejected': return 'bg-red-100 text-red-800'
-            default: return 'bg-gray-100 text-gray-800'
-        }
-    }
-
     return (
-        <div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-8">Manajemen Sekolah</h1>
-
-            {/* Filters */}
-            <div className="bg-white p-4 rounded-lg shadow mb-6 flex flex-col md:flex-row gap-4">
-                <div className="flex-1 relative">
-                    <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
-                    <input
-                        type="text"
-                        placeholder="Cari nama sekolah atau email..."
-                        className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-primary-500 outline-none"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                </div>
-
-                <div className="flex gap-2">
-                    {['all', 'active', 'pending', 'rejected'].map((status) => (
-                        <button
-                            key={status}
-                            onClick={() => setStatusFilter(status)}
-                            className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors
-                        ${statusFilter === status
-                                    ? 'bg-primary-600 text-white'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                }
-                    `}
-                        >
-                            {status}
-                        </button>
-                    ))}
-                </div>
+        <div className="min-h-screen">
+            <div className="mb-6">
+                <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Manajemen Sekolah</h1>
+                <p className="text-sm text-gray-500 mt-1">Daftar semua sekolah yang terdaftar dalam sistem.</p>
             </div>
 
-            {/* Grid */}
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {isLoading ? (
-                    <div className="col-span-full text-center py-12">Memuat data sekolah...</div>
-                ) : filteredSchools.length === 0 ? (
-                    <div className="col-span-full text-center py-12 text-gray-500">Tidak ada sekolah ditemukan matching filter.</div>
-                ) : (
-                    filteredSchools.map((school) => (
-                        <div key={school.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg transition-all transform hover:-translate-y-1">
-                            <div className="p-6">
-                                <div className="flex justify-between items-start mb-4">
-                                    <div className="w-10 h-10 bg-primary-100 rounded-lg flex items-center justify-center text-primary-600">
-                                        <Building2 className="h-6 w-6" />
-                                    </div>
-                                    <span className={`px-2 py-1 text-xs font-semibold rounded-full capitalize ${getStatusColor(school.status)}`}>
-                                        {school.status}
-                                    </span>
-                                </div>
-                                <h3 className="text-lg font-bold text-gray-900 mb-1">{school.name}</h3>
-                                <p className="text-sm text-gray-500 mb-4">{school.email}</p>
-
-                                <div className="space-y-2 text-sm text-gray-600">
-                                    <div className="flex items-center">
-                                        <Clock className="h-4 w-4 mr-2 text-gray-400" />
-                                        <span>Daftar: {new Date(school.created_at).toLocaleDateString('id-ID')}</span>
-                                    </div>
-                                    {school.address && (
-                                        <p className="line-clamp-2">{school.address}</p>
-                                    )}
-                                </div>
-                            </div>
-                            {/* Action Footer (Optional, can just list/read-only or link to detail) */}
-                            {/* <div className="bg-gray-50 px-6 py-4 border-t border-gray-100">
-                        <button className="text-primary-600 hover:text-primary-800 text-sm font-medium">Lihat Detail</button>
-                    </div> */}
+            <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                {/* Toolbar */}
+                <div className="p-4 border-b border-gray-100 flex flex-col sm:flex-row gap-4 justify-between items-center bg-gray-50/50">
+                    <div className="relative w-full sm:w-72">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <Search className="h-4 w-4 text-gray-400" />
                         </div>
-                    ))
-                )}
+                        <input
+                            type="text"
+                            className="block w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-shadow"
+                            placeholder="Cari nama sekolah..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <Filter className="w-4 h-4 text-gray-400" />
+                        <select
+                            className="block w-full sm:w-auto p-2 border border-gray-200 rounded-lg text-sm focus:ring-blue-500 focus:border-blue-500 bg-white"
+                            value={statusFilter}
+                            onChange={(e) => setStatusFilter(e.target.value)}
+                        >
+                            <option value="all">Semua Status</option>
+                            <option value="active">Active</option>
+                            <option value="pending">Pending</option>
+                            <option value="inactive">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+
+                {/* Table */}
+                <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-100">
+                        <thead className="bg-gray-50">
+                            <tr>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nama Sekolah</th>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
+                                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Terdaftar Sejak</th>
+                                <th className="relative px-6 py-3">
+                                    <span className="sr-only">Actions</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-100">
+                            {isLoading ? (
+                                <tr>
+                                    <td colSpan={4} className="px-6 py-10 text-center text-sm text-gray-500">
+                                        Memuat data sekolah...
+                                    </td>
+                                </tr>
+                            ) : filtered.length === 0 ? (
+                                <tr>
+                                    <td colSpan={4} className="px-6 py-10 text-center text-sm text-gray-500">
+                                        Tidak ada data sekolah.
+                                    </td>
+                                </tr>
+                            ) : (
+                                filtered.map((school) => (
+                                    <tr key={school.id} className="hover:bg-gray-50/50 transition-colors group">
+                                        <td className="px-6 py-3 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                                <div className="h-9 w-9 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 mr-3">
+                                                    <School className="w-5 h-5" />
+                                                </div>
+                                                <div>
+                                                    <div className="text-sm font-semibold text-gray-900">{school.name}</div>
+                                                    <div className="text-xs text-gray-500">{school.email}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td className="px-6 py-3 whitespace-nowrap">
+                                            <span className={`px-2.5 py-1 inline-flex items-center text-xs font-medium rounded-full 
+                                        ${school.status === 'active' ? 'bg-green-50 text-green-700 border border-green-100' :
+                                                    school.status === 'pending' ? 'bg-yellow-50 text-yellow-700 border border-yellow-100' :
+                                                        'bg-red-50 text-red-700 border border-red-100'}`}>
+
+                                                {school.status === 'active' ? <CheckCircle2 className="w-3 h-3 mr-1" /> :
+                                                    school.status === 'pending' ? <Clock className="w-3 h-3 mr-1" /> :
+                                                        <XCircle className="w-3 h-3 mr-1" />}
+                                                {school.status.charAt(0).toUpperCase() + school.status.slice(1)}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-3 whitespace-nowrap text-xs text-gray-500">
+                                            {new Date(school.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                        </td>
+                                        <td className="px-6 py-3 whitespace-nowrap text-right text-sm font-medium">
+                                            <button className="text-gray-400 hover:text-blue-600 transition-colors opacity-0 group-hover:opacity-100">
+                                                <ExternalLink className="w-4 h-4" />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     )

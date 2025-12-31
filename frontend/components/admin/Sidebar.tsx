@@ -19,18 +19,21 @@ export default function Sidebar() {
     const isActive = (href: string) => pathname.startsWith(href)
 
     return (
-        <div className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 min-h-screen fixed left-0 top-0 bottom-0 z-50">
+        <div className="hidden md:flex flex-col w-64 bg-white/80 backdrop-blur-xl border-r border-gray-100 min-h-screen fixed left-0 top-0 bottom-0 z-50">
             {/* Logo */}
-            <div className="flex items-center justify-center h-16 border-b border-gray-200">
-                <div className="flex items-center">
-                    <div className="w-8 h-8 bg-gradient-to-r from-primary-600 to-secondary-600 rounded-lg mr-2"></div>
-                    <span className="text-xl font-bold text-gray-900">YukAdmin</span>
+            <div className="flex items-center h-16 px-6 border-b border-gray-100">
+                <div className="flex items-center gap-2.5">
+                    <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-md shadow-blue-500/20">
+                        YA
+                    </div>
+                    <span className="text-lg font-bold text-gray-800 tracking-tight">YukAdmin</span>
                 </div>
             </div>
 
             {/* Navigation */}
-            <div className="flex-1 flex flex-col overflow-y-auto pt-5 pb-4">
-                <nav className="mt-5 flex-1 px-2 space-y-1">
+            <div className="flex-1 flex flex-col overflow-y-auto px-3 py-4">
+                <nav className="space-y-1">
+                    <div className="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Menu</div>
                     {navigation.map((item) => {
                         const active = isActive(item.href)
                         return (
@@ -38,14 +41,14 @@ export default function Sidebar() {
                                 key={item.name}
                                 href={item.href}
                                 className={`
-                  group flex items-center px-4 py-3 text-sm font-medium rounded-md transition-colors
+                  group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200
                   ${active
-                                        ? 'bg-primary-50 text-primary-700 border-r-4 border-primary-600'
-                                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}
+                                        ? 'bg-blue-50 text-blue-700 shadow-sm'
+                                        : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'}
                 `}
                             >
                                 <item.icon
-                                    className={`mr-3 h-5 w-5 flex-shrink-0 ${active ? 'text-primary-600' : 'text-gray-400 group-hover:text-gray-500'}`}
+                                    className={`mr-3 h-4 w-4 flex-shrink-0 transition-colors ${active ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-500'}`}
                                 />
                                 {item.name}
                             </Link>
@@ -55,19 +58,13 @@ export default function Sidebar() {
             </div>
 
             {/* User & Logout */}
-            <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
+            <div className="flex-shrink-0 border-t border-gray-100 p-3">
                 <button
                     onClick={logout}
-                    className="flex-shrink-0 w-full group block"
+                    className="flex w-full items-center px-3 py-2 text-sm font-medium text-gray-500 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors group"
                 >
-                    <div className="flex items-center">
-                        <div className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-red-100 text-red-700">
-                            <LogOut className="h-5 w-5" />
-                        </div>
-                        <div className="ml-3 text-left">
-                            <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">Logout</p>
-                        </div>
-                    </div>
+                    <LogOut className="mr-3 h-4 w-4 text-gray-400 group-hover:text-red-500 transition-colors" />
+                    Logout
                 </button>
             </div>
         </div>
