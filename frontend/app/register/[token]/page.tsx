@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
+import { ArrowLeft, ArrowRight, User, BookOpen, MapPin, Users, CheckCircle, GraduationCap, AlertCircle, Clock, ShieldCheck, Check } from 'lucide-react'
 
 interface SchoolInfo {
   id: number
@@ -13,47 +14,35 @@ interface SchoolInfo {
 }
 
 interface FormData {
-  // Personal Information
   full_name: string
   email: string
   phone: string
   birth_place: string
   birth_date: string
   gender: 'male' | 'female'
-
-  // School & Program
   program: string
-
-  // Previous Education
   previous_school: string
   previous_school_year: string
-
-  // Address
   address: string
   city: string
   province: string
   postal_code: string
-
-  // Parent Information
   father_name: string
   father_phone: string
   father_job: string
-
   mother_name: string
   mother_phone: string
   mother_job: string
-
-  // Documents (to be uploaded later)
   terms_accepted: boolean
 }
 
 // Loading component
 function LoadingState() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-        <p className="mt-4 text-gray-600">Memuat formulir pendaftaran...</p>
+    <div className="min-h-screen flex items-center justify-center bg-[url('/grid-pattern.svg')] bg-cover bg-center">
+      <div className="text-center bg-white/80 backdrop-blur-xl p-8 rounded-2xl shadow-xl border border-white/50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+        <p className="text-gray-600 font-medium">Memuat formulir pendaftaran...</p>
       </div>
     </div>
   )
@@ -72,7 +61,6 @@ function StudentRegistrationContent() {
   const [success, setSuccess] = useState(false)
   const [registrationResult, setRegistrationResult] = useState<any>(null)
   const [authToken, setAuthToken] = useState<string | null>(null)
-  const [uploadedFiles, setUploadedFiles] = useState<string[]>([])
   const [loginRequired, setLoginRequired] = useState(false)
   const [currentStep, setCurrentStep] = useState(1)
 
@@ -139,7 +127,6 @@ function StudentRegistrationContent() {
   }, [token])
 
   // Prefill form if user is logged in
-  // Prefill form ONLY if user is logged in as STUDENT
   useEffect(() => {
     if (user && user.role === 'student') {
       setFormData(prev => ({
@@ -168,30 +155,25 @@ function StudentRegistrationContent() {
         if (!formData.birth_place.trim()) return 'Tempat lahir harus diisi'
         if (!formData.birth_date) return 'Tanggal lahir harus diisi'
         return ''
-
       case 2:
         if (!formData.program) return 'Pilih program/jurusan'
         if (!formData.previous_school.trim()) return 'Sekolah asal harus diisi'
         if (!formData.previous_school_year) return 'Tahun lulus harus diisi'
         return ''
-
       case 3:
         if (!formData.address.trim()) return 'Alamat harus diisi'
         if (!formData.city.trim()) return 'Kota harus diisi'
         if (!formData.province.trim()) return 'Provinsi harus diisi'
         return ''
-
       case 4:
         if (!formData.father_name.trim()) return 'Nama ayah harus diisi'
         if (!formData.father_phone.trim()) return 'Nomor telepon ayah harus diisi'
         if (!formData.mother_name.trim()) return 'Nama ibu harus diisi'
         if (!formData.mother_phone.trim()) return 'Nomor telepon ibu harus diisi'
         return ''
-
       case 5:
         if (!formData.terms_accepted) return 'Anda harus menyetujui syarat dan ketentuan'
         return ''
-
       default:
         return ''
     }
@@ -263,7 +245,7 @@ function StudentRegistrationContent() {
       setSuccess(true)
       setRegistrationResult(data)
 
-      // Auto login to get token for upload
+      // Auto login logic (optional, preserved from original)
       try {
         const loginResponse = await fetch('http://localhost:8000/api/login', {
           method: 'POST',
@@ -276,11 +258,8 @@ function StudentRegistrationContent() {
 
         if (loginResponse.ok) {
           const loginData = await loginResponse.json()
-          // Handle nested data structure { data: { token: ... } }
           const token = loginData.data?.token || loginData.token
-          if (token) {
-            setAuthToken(token)
-          }
+          if (token) setAuthToken(token)
         }
       } catch (e) {
         console.error('Auto login failed:', e)
@@ -290,29 +269,30 @@ function StudentRegistrationContent() {
 
     } catch (err: any) {
       setError(err.message || 'Terjadi kesalahan. Silakan coba lagi.')
-      console.error('Registration error:', err)
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  if (isLoading) {
-    return <LoadingState />
-  }
+  if (isLoading) return <LoadingState />
 
   if (error && !schoolInfo) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-        <div className="max-w-md w-full text-center">
+      <div className="min-h-screen flex items-center justify-center bg-[url('/grid-pattern.svg')] bg-cover bg-center px-4 relative overflow-hidden">
+        {/* Ambient Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/90 via-white/90 to-blue-50/90 -z-10"></div>
+
+        <div className="max-w-md w-full text-center bg-white/80 backdrop-blur-xl p-8 rounded-2xl shadow-xl border border-white/50 animate-shake">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <span className="text-2xl text-red-600">❌</span>
+            <AlertCircle className="w-8 h-8 text-red-600" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Link Tidak Valid</h1>
-          <p className="text-gray-600 mb-8">{error}</p>
+          <p className="text-gray-600 mb-8 leading-relaxed">{error}</p>
           <Link
             href="/"
-            className="inline-block px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
+            className="inline-flex items-center px-6 py-3 bg-indigo-600 text-white font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg hover:shadow-indigo-500/30"
           >
+            <ArrowLeft className="w-5 h-5 mr-2" />
             Kembali ke Beranda
           </Link>
         </div>
@@ -320,774 +300,318 @@ function StudentRegistrationContent() {
     )
   }
 
+  const steps = [
+    { num: 1, icon: User, label: 'Data Diri' },
+    { num: 2, icon: BookOpen, label: 'Pendidikan' },
+    { num: 3, icon: MapPin, label: 'Alamat' },
+    { num: 4, icon: Users, label: 'Wali' },
+    { num: 5, icon: ShieldCheck, label: 'Konfirmasi' }
+  ]
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="flex items-center">
-              <Link href="/" className="flex items-center">
-                <div className="w-8 h-8 bg-gradient-to-r from-primary-600 to-secondary-600 rounded-lg flex items-center justify-center text-white font-bold text-sm mr-3">
-                  YS
-                </div>
-                <span className="font-bold text-gray-900">Yuksekolah</span>
-              </Link>
-            </div>
-            <div className="text-sm text-gray-600">
-              Formulir Pendaftaran • {schoolInfo?.name}
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-[url('/grid-pattern.svg')] bg-cover bg-center py-12 px-4 sm:px-6 lg:px-8 relative">
+      {/* Ambient Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-indigo-50/90 via-white/90 to-blue-50/90 -z-10"></div>
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-200/30 rounded-full blur-[100px] -z-10"></div>
+      <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-200/30 rounded-full blur-[100px] -z-10"></div>
 
-      <main className="max-w-4xl mx-auto px-4 py-8">
-        {/* Progress Bar */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            {[1, 2, 3, 4, 5, 6].map((step) => (
-              <div key={step} className="flex flex-col items-center">
-                <div className={`
-                  w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
-                  ${currentStep === step ? 'bg-primary-600 text-white' :
-                    currentStep > step ? 'bg-green-500 text-white' :
-                      'bg-gray-200 text-gray-500'}
-                  ${step === 6 ? 'hidden sm:flex' : ''}
-                `}>
-                  {currentStep > step ? '✓' : step}
-                </div>
-                <div className="text-xs text-gray-600 mt-2 hidden sm:block">
-                  {step === 1 && 'Data Diri'}
-                  {step === 2 && 'Pendidikan'}
-                  {step === 3 && 'Alamat'}
-                  {step === 4 && 'Orang Tua'}
-                  {step === 5 && 'Konfirmasi'}
-                  {step === 6 && 'Selesai'}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-primary-600 transition-all duration-300"
-              style={{ width: `${((currentStep - 1) / 5) * 100}%` }}
-            />
-          </div>
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-10 animate-fade-in-up">
+          <Link href="/" className="inline-flex items-center text-gray-500 hover:text-indigo-600 mb-6 transition-colors group bg-white/50 backdrop-blur-sm px-4 py-2 rounded-full border border-gray-100 shadow-sm">
+            <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+            <span className="text-sm font-medium">Kembali ke Beranda</span>
+          </Link>
+          <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-3 tracking-tight">Formulir Pendaftaran Siswa</h1>
+          <p className="text-lg text-gray-600 font-medium">{schoolInfo?.name}</p>
+          <p className="text-sm text-gray-500 mt-1">Tahun Ajaran 2024/2025</p>
         </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
-            <div className="flex items-center mb-2">
-              <span className="text-lg mr-2">⚠️</span>
-              <span>{error}</span>
+        {/* Progress Steps (Hidden on success) */}
+        {!success && (
+          <div className="mb-10 mx-auto max-w-3xl">
+            <div className="relative flex items-center justify-between">
+              {/* Connector Line */}
+              <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-200 -z-10 rounded-full"></div>
+              <div
+                className="absolute top-1/2 left-0 h-1 bg-indigo-600 -z-10 rounded-full transition-all duration-500 ease-in-out"
+                style={{ width: `${((currentStep - 1) / 4) * 100}%` }}
+              ></div>
+
+              {steps.map((s) => {
+                const isActive = currentStep >= s.num;
+                const isCurrent = currentStep === s.num;
+                return (
+                  <div key={s.num} className="relative flex flex-col items-center group">
+                    <div className={`
+                      w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center font-bold text-sm md:text-base border-4 transition-all duration-300 shadow-lg z-10
+                      ${isActive ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-white border-gray-200 text-gray-400'}
+                      ${isCurrent ? 'scale-110 ring-4 ring-indigo-100' : ''}
+                    `}>
+                      {isActive && !isCurrent ? <Check className="w-5 h-5" /> : <s.icon className="w-4 h-4 md:w-5 md:h-5" />}
+                    </div>
+                    <span className={`mt-2 text-xs md:text-sm font-bold bg-white/60 backdrop-blur px-2 py-1 rounded-lg transition-colors ${isActive ? 'text-indigo-700' : 'text-gray-400'}`}>
+                      {s.label}
+                    </span>
+                  </div>
+                )
+              })}
             </div>
-            {loginRequired && (
-              <div className="ml-7">
-                <Link
-                  href="/login"
-                  className="text-sm bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 inline-block"
-                >
-                  Login Sekarang
-                </Link>
-                <p className="text-xs mt-2 text-red-600">
-                  Silakan login dengan email tersebut untuk melanjutkan pendaftaran.
-                </p>
-              </div>
-            )}
           </div>
         )}
 
-        {/* School Info Card */}
-        <div className="mb-8 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl p-6 text-white">
-          <h1 className="text-2xl font-bold mb-2">Formulir Pendaftaran Siswa Baru</h1>
-          <p className="opacity-90">
-            {schoolInfo?.name} • Tahun Ajaran 2024/2025
-          </p>
-          <div className="mt-4 text-sm bg-white/20 rounded-lg p-3">
-            ⏱️ Perkiraan waktu pengisian: 10-15 menit
-          </div>
-        </div>
+        {/* Main Form Container */}
+        <div className="bg-white/80 backdrop-blur-xl rounded-[2rem] shadow-2xl border border-white/50 overflow-hidden relative animate-fade-in-up animation-delay-300">
+          {/* Decorative top border */}
+          <div className="h-2 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
 
-        {/* Form Steps */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-          {/* Step 1: Personal Information */}
-          {currentStep === 1 && (
-            <div className="animate-fadeIn">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">1. Data Pribadi Calon Siswa</h2>
-              <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nama Lengkap <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="full_name"
-                      value={formData.full_name}
-                      onChange={handleChange}
-                      readOnly={!!user}
-                      className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${user ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
-                      placeholder="Nama sesuai akta kelahiran"
-                      required
-                    />
+          {error && (
+            <div className="mx-6 mt-6 p-4 bg-red-50 border border-red-100 rounded-xl flex items-start animate-shake">
+              <AlertCircle className="w-5 h-5 text-red-500 mt-0.5 mr-3 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm text-red-700 font-medium">{error}</p>
+                {loginRequired && (
+                  <div className="mt-2 text-sm">
+                    <Link href="/login" className="font-bold text-red-700 underline hover:text-red-800">Login sekarang</Link> untuk melanjutkan.
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Email <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      readOnly={!!user}
-                      className={`w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent ${user ? 'bg-gray-100 text-gray-500 cursor-not-allowed' : ''}`}
-                      placeholder="email@contoh.com"
-                      required
-                    />
-                    {user ? (
-                      <p className="mt-1 text-xs text-blue-600 flex items-center">
-                        ✅ Anda login sebagai {user.name} ({user.email})
-                      </p>
-                    ) : (
-                      <p className="mt-1 text-xs text-gray-500">
-                        Untuk login dan notifikasi
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nomor Telepon/WA <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="081234567890"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Tempat Lahir <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="birth_place"
-                      value={formData.birth_place}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="Kota kelahiran"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Tanggal Lahir <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="date"
-                      name="birth_date"
-                      value={formData.birth_date}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Jenis Kelamin <span className="text-red-500">*</span>
-                  </label>
-                  <div className="flex space-x-4">
-                    <label className="inline-flex items-center">
-                      <input
-                        type="radio"
-                        name="gender"
-                        value="male"
-                        checked={formData.gender === 'male'}
-                        onChange={handleChange}
-                        className="h-4 w-4 text-primary-600 focus:ring-primary-500"
-                      />
-                      <span className="ml-2">Laki-laki</span>
-                    </label>
-                    <label className="inline-flex items-center">
-                      <input
-                        type="radio"
-                        name="gender"
-                        value="female"
-                        checked={formData.gender === 'female'}
-                        onChange={handleChange}
-                        className="h-4 w-4 text-primary-600 focus:ring-primary-500"
-                      />
-                      <span className="ml-2">Perempuan</span>
-                    </label>
-                  </div>
-                </div>
+                )}
               </div>
             </div>
           )}
 
-          {/* Step 2: Education Information */}
-          {currentStep === 2 && (
-            <div className="animate-fadeIn">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">2. Data Pendidikan</h2>
-              <div className="space-y-6">
+          <div className="p-6 md:p-10">
+            {/* Step 1: Personal Info */}
+            {currentStep === 1 && (
+              <div className="animate-fade-in space-y-6">
+                <h2 className="text-2xl font-bold text-gray-900">Data Pribadi</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Nama Lengkap <span className="text-red-500">*</span></label>
+                    <input type="text" name="full_name" value={formData.full_name} onChange={handleChange} readOnly={!!user && user.role === 'student'}
+                      className={`w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all font-medium text-gray-900 ${user?.role === 'student' ? 'bg-gray-50 text-gray-500 cursor-not-allowed' : ''}`} placeholder="Sesuai akta kelahiran" required />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Email <span className="text-red-500">*</span></label>
+                    <input type="email" name="email" value={formData.email} onChange={handleChange} readOnly={!!user && user.role === 'student'}
+                      className={`w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all font-medium text-gray-900 ${user?.role === 'student' ? 'bg-gray-50 text-gray-500 cursor-not-allowed' : ''}`} placeholder="email@contoh.com" required />
+                    {user && user.role === 'student' && <p className="text-xs text-indigo-600 mt-1 font-medium">✨ Terisi otomatis dari akun Anda</p>}
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">No. Telepon/WA <span className="text-red-500">*</span></label>
+                    <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all font-medium text-gray-900" placeholder="0812..." required />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Tempat Lahir <span className="text-red-500">*</span></label>
+                    <input type="text" name="birth_place" value={formData.birth_place} onChange={handleChange} className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all font-medium text-gray-900" required />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Tanggal Lahir <span className="text-red-500">*</span></label>
+                    <input type="date" name="birth_date" value={formData.birth_date} onChange={handleChange} className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all font-medium text-gray-900" required />
+                  </div>
+                </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Program/Jurusan yang Dipilih <span className="text-red-500">*</span>
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                    {schoolInfo?.programs.map((program) => (
-                      <label key={program} className="relative">
-                        <input
-                          type="radio"
-                          name="program"
-                          value={program}
-                          checked={formData.program === program}
-                          onChange={handleChange}
-                          className="sr-only peer"
-                        />
-                        <div className="p-4 border-2 border-gray-200 rounded-lg text-center cursor-pointer peer-checked:border-primary-500 peer-checked:bg-primary-50 transition">
-                          <div className="font-medium">{program}</div>
-                        </div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Jenis Kelamin <span className="text-red-500">*</span></label>
+                  <div className="flex gap-4">
+                    {['male', 'female'].map((g) => (
+                      <label key={g} className={`flex-1 p-4 border-2 rounded-xl cursor-pointer transition-all flex items-center justify-center font-bold ${formData.gender === g ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-gray-200 hover:border-gray-300'}`}>
+                        <input type="radio" name="gender" value={g} checked={formData.gender === g} onChange={handleChange} className="sr-only" />
+                        {g === 'male' ? 'Laki-laki' : 'Perempuan'}
                       </label>
                     ))}
                   </div>
                 </div>
+              </div>
+            )}
 
+            {/* Step 2: Education */}
+            {currentStep === 2 && (
+              <div className="animate-fade-in space-y-6">
+                <h2 className="text-2xl font-bold text-gray-900">Data Pendidikan</h2>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Pilih Jurusan/Program <span className="text-red-500">*</span></label>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {schoolInfo?.programs.map((prog) => (
+                      <label key={prog} className={`p-4 border-2 rounded-xl cursor-pointer transition-all text-center font-bold ${formData.program === prog ? 'border-indigo-500 bg-indigo-50 text-indigo-700 shadow-md' : 'border-gray-200 hover:border-gray-300'}`}>
+                        <input type="radio" name="program" value={prog} checked={formData.program === prog} onChange={handleChange} className="sr-only" />
+                        {prog}
+                      </label>
+                    ))}
+                  </div>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Sekolah Asal <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="previous_school"
-                      value={formData.previous_school}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="Nama sekolah sebelumnya"
-                      required
-                    />
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Sekolah Asal <span className="text-red-500">*</span></label>
+                    <input type="text" name="previous_school" value={formData.previous_school} onChange={handleChange} className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all font-medium text-gray-900" placeholder="Nama sekolah sebelumnya" required />
                   </div>
-
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Tahun Lulus <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      name="previous_school_year"
-                      value={formData.previous_school_year}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      required
-                    >
-                      {Array.from({ length: 10 }, (_, i) => {
-                        const year = new Date().getFullYear() - i
-                        return (
-                          <option key={year} value={year.toString()}>
-                            {year}
-                          </option>
-                        )
-                      })}
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Tahun Lulus <span className="text-red-500">*</span></label>
+                    <select name="previous_school_year" value={formData.previous_school_year} onChange={handleChange} className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all font-medium text-gray-900">
+                      {Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i).map(y => <option key={y} value={y}>{y}</option>)}
                     </select>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Step 3: Address Information */}
-          {currentStep === 3 && (
-            <div className="animate-fadeIn">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">3. Alamat Tempat Tinggal</h2>
-              <div className="space-y-6">
+            {/* Step 3: Address */}
+            {currentStep === 3 && (
+              <div className="animate-fade-in space-y-6">
+                <h2 className="text-2xl font-bold text-gray-900">Alamat Lengkap</h2>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Alamat Lengkap <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
-                    name="address"
-                    value={formData.address}
-                    onChange={handleChange}
-                    rows={3}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="Jl. Contoh No. 123, RT/RW, Kelurahan"
-                    required
-                  />
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Alamat Jalan <span className="text-red-500">*</span></label>
+                  <textarea name="address" value={formData.address} onChange={handleChange} rows={3} className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all font-medium text-gray-900 resize-none" placeholder="Nama Jalan, RT/RW, Kelurahan" required />
                 </div>
-
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Kota/Kabupaten <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="city"
-                      value={formData.city}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="Nama kota"
-                      required
-                    />
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Kota/Kab <span className="text-red-500">*</span></label>
+                    <input type="text" name="city" value={formData.city} onChange={handleChange} className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all font-medium text-gray-900" required />
                   </div>
-
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Provinsi <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="province"
-                      value={formData.province}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="Nama provinsi"
-                      required
-                    />
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Provinsi <span className="text-red-500">*</span></label>
+                    <input type="text" name="province" value={formData.province} onChange={handleChange} className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all font-medium text-gray-900" required />
                   </div>
-
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Kode Pos
-                    </label>
-                    <input
-                      type="text"
-                      name="postal_code"
-                      value={formData.postal_code}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="12345"
-                    />
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Kode Pos</label>
+                    <input type="text" name="postal_code" value={formData.postal_code} onChange={handleChange} className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all font-medium text-gray-900" />
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Step 4: Parent Information */}
-          {currentStep === 4 && (
-            <div className="animate-fadeIn">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">4. Data Orang Tua/Wali</h2>
-              <div className="space-y-8">
-                <div className="border-l-4 border-primary-500 pl-4 py-2 bg-primary-50">
-                  <h3 className="font-medium text-gray-900">Ayah Kandung</h3>
-                </div>
+            {/* Step 4: Guardians */}
+            {currentStep === 4 && (
+              <div className="animate-fade-in space-y-8">
+                <h2 className="text-2xl font-bold text-gray-900">Data Orang Tua / Wali</h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nama Lengkap Ayah <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="father_name"
-                      value={formData.father_name}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="Nama ayah"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nomor Telepon <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      name="father_phone"
-                      value={formData.father_phone}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="081234567890"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Pekerjaan
-                    </label>
-                    <input
-                      type="text"
-                      name="father_job"
-                      value={formData.father_job}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="Pekerjaan ayah"
-                    />
+                <div className="bg-indigo-50/50 p-6 rounded-xl border border-indigo-100">
+                  <h3 className="text-indigo-800 font-bold mb-4 flex items-center"><User className="w-5 h-5 mr-2" /> Data Ayah</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <input type="text" name="father_name" value={formData.father_name} onChange={handleChange} className="w-full px-5 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all font-medium text-gray-900" placeholder="Nama Lengkap Ayah *" required />
+                    <input type="tel" name="father_phone" value={formData.father_phone} onChange={handleChange} className="w-full px-5 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all font-medium text-gray-900" placeholder="No. HP Ayah *" required />
+                    <input type="text" name="father_job" value={formData.father_job} onChange={handleChange} className="w-full px-5 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all font-medium text-gray-900 md:col-span-2" placeholder="Pekerjaan Ayah" />
                   </div>
                 </div>
 
-                <div className="border-l-4 border-secondary-500 pl-4 py-2 bg-secondary-50">
-                  <h3 className="font-medium text-gray-900">Ibu Kandung</h3>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nama Lengkap Ibu <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="mother_name"
-                      value={formData.mother_name}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="Nama ibu"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Nomor Telepon <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      name="mother_phone"
-                      value={formData.mother_phone}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="081234567890"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Pekerjaan
-                    </label>
-                    <input
-                      type="text"
-                      name="mother_job"
-                      value={formData.mother_job}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                      placeholder="Pekerjaan ibu"
-                    />
+                <div className="bg-pink-50/50 p-6 rounded-xl border border-pink-100">
+                  <h3 className="text-pink-800 font-bold mb-4 flex items-center"><User className="w-5 h-5 mr-2" /> Data Ibu</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <input type="text" name="mother_name" value={formData.mother_name} onChange={handleChange} className="w-full px-5 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-pink-100 focus:border-pink-500 transition-all font-medium text-gray-900" placeholder="Nama Lengkap Ibu *" required />
+                    <input type="tel" name="mother_phone" value={formData.mother_phone} onChange={handleChange} className="w-full px-5 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-pink-100 focus:border-pink-500 transition-all font-medium text-gray-900" placeholder="No. HP Ibu *" required />
+                    <input type="text" name="mother_job" value={formData.mother_job} onChange={handleChange} className="w-full px-5 py-3 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-pink-100 focus:border-pink-500 transition-all font-medium text-gray-900 md:col-span-2" placeholder="Pekerjaan Ibu" />
                   </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Step 5: Confirmation */}
-          {currentStep === 5 && (
-            <div className="animate-fadeIn">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">5. Konfirmasi Data</h2>
+            {/* Step 5: Confirmation */}
+            {currentStep === 5 && (
+              <div className="animate-fade-in space-y-6">
+                <h2 className="text-2xl font-bold text-gray-900">Konfirmasi Data</h2>
+                <div className="bg-gray-50 p-6 rounded-xl border border-gray-200 text-sm space-y-4">
+                  <div className="flex justify-between border-b border-gray-200 pb-2">
+                    <span className="text-gray-500">Nama Lengkap</span>
+                    <span className="font-bold text-gray-900">{formData.full_name}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-gray-200 pb-2">
+                    <span className="text-gray-500">Program</span>
+                    <span className="font-bold text-gray-900">{formData.program}</span>
+                  </div>
+                  <div className="flex justify-between border-b border-gray-200 pb-2">
+                    <span className="text-gray-500">Email</span>
+                    <span className="font-bold text-gray-900">{formData.email}</span>
+                  </div>
+                  <div className="flex justify-between pb-2">
+                    <span className="text-gray-500">Sekolah Asal</span>
+                    <span className="font-bold text-gray-900">{formData.previous_school}</span>
+                  </div>
+                </div>
 
-              <div className="space-y-6">
-                {/* Data Summary */}
-                <div className="bg-gray-50 rounded-xl p-6">
-                  <h3 className="font-bold text-gray-900 mb-4">Ringkasan Data Anda</h3>
+                <div className="flex items-start bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                  <input type="checkbox" id="terms" checked={formData.terms_accepted} onChange={(e) => setFormData({ ...formData, terms_accepted: e.target.checked })} className="mt-1 w-5 h-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 cursor-pointer" />
+                  <label htmlFor="terms" className="ml-3 text-sm text-gray-700 cursor-pointer">
+                    Saya menyatakan bahwa data yang saya isi adalah benar dan dapat dipertanggungjawabkan. Saya setuju dengan <span className="font-bold text-indigo-600">Syarat & Ketentuan</span> yang berlaku di {schoolInfo?.name}.
+                  </label>
+                </div>
+              </div>
+            )}
 
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <div className="text-sm text-gray-500">Nama Lengkap</div>
-                        <div className="font-medium">{formData.full_name}</div>
+            {/* Step 6: Success */}
+            {currentStep === 6 && (
+              <div className="animate-fade-in text-center py-8">
+                <div className="inline-flex relative mb-6">
+                  <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center animate-bounce-slow">
+                    <CheckCircle className="w-12 h-12 text-green-600" />
+                  </div>
+                  <div className="absolute top-0 right-0 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center animate-pulse">✨</div>
+                </div>
+                <h2 className="text-3xl font-extrabold text-gray-900 mb-4">Pendaftaran Berhasil! 🎉</h2>
+                <p className="text-gray-600 mb-8 max-w-lg mx-auto">
+                  Terima kasih, <span className="font-bold text-gray-900">{formData.full_name}</span>.
+                  Data pendaftaran Anda telah kami terima dan sedang dalam proses verifikasi.
+                </p>
+                <div className="bg-indigo-50 rounded-2xl p-6 max-w-lg mx-auto mb-8 border border-indigo-100 text-left">
+                  <h3 className="font-bold text-indigo-900 mb-3 flex items-center"><GraduationCap className="w-5 h-5 mr-2" /> Detail Akun Siswa</h3>
+                  {registrationResult?.student_account && (
+                    <div className="space-y-3 text-sm">
+                      <div className="flex justify-between bg-white p-3 rounded-lg border border-indigo-100">
+                        <span className="text-gray-500">Email Login</span>
+                        <span className="font-mono font-bold text-gray-900">{registrationResult.student_account.email}</span>
                       </div>
-                      <div>
-                        <div className="text-sm text-gray-500">Email</div>
-                        <div className="font-medium">{formData.email}</div>
+                      <div className="flex justify-between bg-white p-3 rounded-lg border border-indigo-100">
+                        <span className="text-gray-500">Password Sementara</span>
+                        <span className="font-mono font-bold text-gray-900">{registrationResult.student_account.password}</span>
                       </div>
+                      <p className="text-xs text-indigo-600 mt-2">
+                        ⚠️ Simpan password ini! Gunakan untuk login dan memantau status pendaftaran Anda.
+                      </p>
                     </div>
-
-                    <div className="border-t pt-4">
-                      <div className="text-sm text-gray-500 mb-2">Sekolah & Program</div>
-                      <div className="font-medium">{schoolInfo?.name} - {formData.program}</div>
-                    </div>
-
-                    <div className="border-t pt-4">
-                      <div className="text-sm text-gray-500 mb-2">Orang Tua</div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <div className="font-medium">{formData.father_name}</div>
-                          <div className="text-sm text-gray-600">{formData.father_phone}</div>
-                        </div>
-                        <div>
-                          <div className="font-medium">{formData.mother_name}</div>
-                          <div className="text-sm text-gray-600">{formData.mother_phone}</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
+                  )}
                 </div>
-
-                {/* Terms & Conditions */}
-                <div className="border rounded-lg p-4">
-                  <div className="flex items-start">
-                    <input
-                      type="checkbox"
-                      id="terms_accepted"
-                      name="terms_accepted"
-                      checked={formData.terms_accepted}
-                      onChange={handleChange}
-                      className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-gray-300 rounded mt-1"
-                    />
-                    <label htmlFor="terms_accepted" className="ml-3 text-sm text-gray-700">
-                      Saya menyatakan bahwa data yang saya berikan adalah benar dan sah.
-                      Saya bersedia menerima konsekuensi hukum jika data yang diberikan ternyata tidak benar.
-                      Saya juga menyetujui bahwa data ini akan digunakan untuk keperluan proses pendaftaran siswa baru.
-                    </label>
-                  </div>
-                </div>
-
-                <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
-                  <div className="flex items-start">
-                    <div className="text-blue-600 mr-3">ℹ️</div>
-                    <div className="text-sm text-blue-800">
-                      <span className="font-semibold">Catatan:</span> Setelah submit, Anda akan mendapatkan akun siswa
-                      untuk memantau status pendaftaran. Password akan dikirim ke email Anda.
-                    </div>
-                  </div>
+                <div className="flex justify-center gap-4">
+                  <Link href="/login" className="px-8 py-3 bg-indigo-600 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700 transition-all hover:-translate-y-1">
+                    Login Siswa
+                  </Link>
+                  <Link href="/" className="px-8 py-3 border-2 border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 transition-all">
+                    Ke Beranda
+                  </Link>
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Step 6: Success */}
-          {currentStep === 6 && registrationResult && (
-            <div className="animate-fadeIn text-center py-8">
-              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-3xl text-green-600">✅</span>
-              </div>
+            {/* Buttons Navigation */}
+            {currentStep < 6 && (
+              <div className="mt-10 pt-6 border-t border-gray-100 flex flex-col-reverse md:flex-row gap-4 justify-between items-center">
+                {currentStep > 1 ? (
+                  <button onClick={prevStep} className="px-6 py-3 text-gray-500 font-bold hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all flex items-center">
+                    <ArrowLeft className="w-4 h-4 mr-2" /> Sebelumnya
+                  </button>
+                ) : (
+                  <div></div> // Spacer
+                )}
 
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Pendaftaran Berhasil Dikirim!
-              </h2>
-
-              <p className="text-lg text-gray-600 mb-6 max-w-2xl mx-auto">
-                Formulir pendaftaran Anda telah diterima oleh {schoolInfo?.name}.
-              </p>
-
-              <div className="bg-gray-50 rounded-xl p-6 mb-8 max-w-2xl mx-auto">
-                <h3 className="font-bold text-gray-900 mb-4">Informasi Akun Siswa</h3>
-                <div className="space-y-3 text-left">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Email Login:</span>
-                    <span className="font-medium">{formData.email}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Password:</span>
-                    <span className="font-medium">password123</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Status:</span>
-                    <span className="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm">
-                      Menunggu Verifikasi
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mt-6 p-4 bg-yellow-50 rounded-lg border border-yellow-100">
-                  <p className="text-sm text-yellow-800">
-                    <span className="font-semibold">Simpan informasi login ini!</span> Gunakan untuk login ke
-                    dashboard siswa dan pantau status pendaftaran Anda.
-                  </p>
-                </div>
-              </div>
-
-              {/* Document Upload Section */}
-              {authToken && registrationResult?.registration_id && (
-                <div className="bg-white border rounded-xl p-6 mb-8 max-w-2xl mx-auto text-left shadow-sm">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">Upload Dokumen Kelengkapan</h3>
-                  <p className="text-sm text-gray-600 mb-6">
-                    Mohon lengkapi dokumen berikut. Dokumen bertanda <span className="text-red-500 font-bold">*</span> wajib diupload.
-                  </p>
-
-                  <div className="space-y-4">
-                    {[
-                      { id: 'photo', label: 'Pas Foto Terbaru', required: true },
-                      { id: 'akta_lahir', label: 'Akta Kelahiran', required: true },
-                      { id: 'kartu_keluarga', label: 'Kartu Keluarga', required: true },
-                      { id: 'transkrip_nilai', label: 'Transkrip Nilai / Rapor', required: true },
-                      { id: 'sertifikat_prestasi', label: 'Sertifikat Prestasi', required: false },
-                      { id: 'other', label: 'Dokumen Lainnya', required: false }
-                    ].map((doc) => {
-                      const isUploaded = uploadedFiles.includes(doc.id)
-                      return (
-                        <div key={doc.id} className={`border rounded-lg p-3 ${isUploaded ? 'bg-green-50 border-green-200' : ''}`}>
-                          <div className="flex justify-between items-center mb-2">
-                            <label className="font-medium text-sm text-gray-700">
-                              {doc.label} {doc.required && <span className="text-red-500">*</span>}
-                            </label>
-                            {isUploaded ? (
-                              <span className="text-xs font-bold text-green-600 flex items-center">
-                                ✓ Terupload
-                              </span>
-                            ) : (
-                              <span className="text-xs text-gray-500">
-                                {doc.required ? 'Wajib' : 'Opsional'}
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex gap-2">
-                            <input
-                              type="file"
-                              accept=".pdf,.jpg,.jpeg,.png"
-                              disabled={isUploaded}
-                              className="block w-full text-sm text-gray-500
-                                file:mr-4 file:py-2 file:px-4
-                                file:rounded-full file:border-0
-                                file:text-sm file:font-semibold
-                                file:bg-primary-50 file:text-primary-700
-                                hover:file:bg-primary-100
-                                disabled:opacity-50 disabled:cursor-not-allowed"
-                              onChange={async (e) => {
-                                const file = e.target.files?.[0]
-                                if (!file) return
-
-                                try {
-                                  const formData = new FormData()
-                                  formData.append('file', file)
-                                  formData.append('type', doc.id)
-
-                                  // Show uploading state
-                                  const btn = e.target as HTMLInputElement
-                                  btn.disabled = true
-                                  const originalText = btn.style.opacity
-                                  btn.style.opacity = '0.5'
-
-                                  const response = await fetch(`http://localhost:8000/api/registrations/${registrationResult.registration_id}/upload`, {
-                                    method: 'POST',
-                                    headers: {
-                                      'Authorization': `Bearer ${authToken}`
-                                    },
-                                    body: formData
-                                  })
-
-                                  if (!response.ok) throw new Error('Upload gagal')
-
-                                  // Update state
-                                  setUploadedFiles(prev => [...prev, doc.id])
-                                  alert(`Dokumen ${doc.label} berhasil diupload!`)
-
-                                } catch (err) {
-                                  alert('Gagal mengupload dokumen. Silakan coba lagi.')
-                                  console.error(err)
-                                  // Reset input on error
-                                  const btn = e.target as HTMLInputElement
-                                  btn.disabled = false
-                                  btn.style.opacity = '1'
-                                  btn.value = ''
-                                }
-                              }}
-                            />
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              )}
-
-              <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <button
-                  onClick={() => {
-                    const mandatoryDocs = ['photo', 'akta_lahir', 'kartu_keluarga', 'transkrip_nilai']
-                    const missingDocs = mandatoryDocs.filter(doc => !uploadedFiles.includes(doc))
-
-                    if (missingDocs.length > 0) {
-                      alert('Mohon lengkapi semua dokumen wajib sebelum melanjutkan.')
-                      return
-                    }
-
-                    router.push('/login')
-                  }}
-                  className="px-6 py-3 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition"
+                  onClick={currentStep === 5 ? handleSubmit : nextStep}
+                  disabled={isSubmitting || (currentStep === 5 && !formData.terms_accepted)}
+                  className="w-full md:w-auto px-10 py-4 bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold rounded-xl shadow-lg hover:shadow-indigo-500/30 hover:-translate-y-1 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 >
-                  Selesai & Masuk Dashboard
+                  {isSubmitting ? (
+                    <>Memproses...</>
+                  ) : (
+                    <>{currentStep === 5 ? 'Kirim Pendaftaran' : 'Lanjut'} <ArrowRight className="ml-2 w-5 h-5" /></>
+                  )}
                 </button>
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Navigation Buttons */}
-          {currentStep < 5 && (
-            <div className="flex flex-col sm:flex-row justify-between gap-4 pt-8 border-t">
-              <div>
-                {currentStep > 1 && (
-                  <button
-                    type="button"
-                    onClick={prevStep}
-                    className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition"
-                  >
-                    ← Kembali
-                  </button>
-                )}
-              </div>
-
-              <div className="flex gap-4">
-                {currentStep < 5 && (
-                  <button
-                    type="button"
-                    onClick={nextStep}
-                    className="px-6 py-3 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition"
-                  >
-                    {currentStep === 4 ? 'Tinjau Data' : 'Lanjut →'}
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Submit Button for Step 5 */}
-          {currentStep === 5 && (
-            <div className="flex flex-col sm:flex-row justify-between gap-4 pt-8 border-t">
-              <button
-                type="button"
-                onClick={prevStep}
-                className="px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition"
-              >
-                ← Kembali
-              </button>
-
-              <button
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? (
-                  <span className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Mengirim Data...
-                  </span>
-                ) : (
-                  'Kirim Pendaftaran'
-                )}
-              </button>
-            </div>
-          )}
+          </div>
         </div>
-
-        {/* Progress Indicator */}
-        <div className="text-center text-sm text-gray-500">
-          Langkah {currentStep} dari 5 • Semua data bersifat rahasia dan aman
-        </div>
-      </main>
+      </div>
     </div>
   )
 }
 
-// Main component with Suspense for dynamic params
 export default function StudentRegistrationPage() {
   return (
     <Suspense fallback={<LoadingState />}>

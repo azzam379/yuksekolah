@@ -1,8 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
+import { LogOut, GraduationCap, MapPin, Phone, Mail, User, Clock, FileText, CheckCircle, AlertCircle, HelpCircle } from 'lucide-react'
+import Link from 'next/link'
 
 interface School {
   id: number
@@ -32,7 +34,7 @@ interface Registration {
   school?: School
 }
 
-export default function StudentDashboard() {
+function StudentDashboardContent() {
   const { user, token, logout } = useAuth()
   const router = useRouter()
   const [registration, setRegistration] = useState<Registration | null>(null)
@@ -142,55 +144,43 @@ export default function StudentDashboard() {
     switch (status) {
       case 'verified':
         return {
-          color: 'bg-green-100 text-green-800 border-green-200',
-          icon: '✅',
-          title: 'Pendaftaran Diterima',
-          message: 'Selamat! Anda telah diterima. Silakan hubungi sekolah untuk langkah selanjutnya.',
-          steps: [
-            '✅ Pendaftaran diverifikasi',
-            '✅ Dokumen lengkap',
-            '✅ Lolos administrasi',
-            '⏳ Tunggu jadwal tes berikutnya'
-          ]
+          bg: 'bg-green-100',
+          text: 'text-green-800',
+          border: 'border-green-200',
+          icon: CheckCircle,
+          title: 'Diterima',
+          message: 'Selamat! Pendaftaran Anda telah diterima.',
+          steps: ['Terkirim', 'Diverifikasi', 'Diterima']
         }
       case 'submitted':
         return {
-          color: 'bg-yellow-100 text-yellow-800 border-yellow-200',
-          icon: '⏳',
+          bg: 'bg-amber-100',
+          text: 'text-amber-800',
+          border: 'border-amber-200',
+          icon: Clock,
           title: 'Menunggu Verifikasi',
-          message: 'Pendaftaran Anda sedang diproses oleh admin sekolah. Biasanya memakan waktu 1-3 hari kerja.',
-          steps: [
-            '✅ Formulir terkirim',
-            '⏳ Admin memeriksa berkas',
-            '⏳ Verifikasi dokumen',
-            '⏳ Pengumuman hasil'
-          ]
+          message: 'Berkas Anda sedang diperiksa admin sekolah.',
+          steps: ['Terkirim', 'Verifikasi', 'Hasil']
         }
       case 'rejected':
         return {
-          color: 'bg-red-100 text-red-800 border-red-200',
-          icon: '❌',
-          title: 'Pendaftaran Ditolak',
-          message: 'Maaf, pendaftaran Anda tidak dapat diproses. Silakan hubungi sekolah untuk informasi lebih lanjut.',
-          steps: [
-            '✅ Formulir terkirim',
-            '❌ Dokumen tidak lengkap',
-            '❌ Tidak memenuhi persyaratan',
-            '📞 Hubungi sekolah untuk klarifikasi'
-          ]
+          bg: 'bg-red-100',
+          text: 'text-red-800',
+          border: 'border-red-200',
+          icon: AlertCircle,
+          title: 'Ditolak',
+          message: 'Mohon maaf, pendaftaran belum memenuhi syarat.',
+          steps: ['Terkirim', 'Diverifikasi', 'Ditolak']
         }
       default:
         return {
-          color: 'bg-gray-100 text-gray-800 border-gray-200',
-          icon: '📝',
-          title: 'Belum Mendaftar',
-          message: 'Anda belum mengisi formulir pendaftaran. Dapatkan link pendaftaran dari sekolah tujuan.',
-          steps: [
-            '📝 Dapatkan link dari sekolah',
-            '📝 Isi formulir online',
-            '📝 Upload berkas',
-            '📝 Tunggu verifikasi'
-          ]
+          bg: 'bg-gray-100',
+          text: 'text-gray-800',
+          border: 'border-gray-200',
+          icon: FileText,
+          title: 'Draft',
+          message: 'Silakan lengkapi formulir pendaftaran.',
+          steps: ['Isi Form', 'Upload', 'Kirim']
         }
     }
   }
@@ -202,10 +192,10 @@ export default function StudentDashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Memuat dashboard siswa...</p>
+      <div className="min-h-screen flex items-center justify-center bg-[url('/grid-pattern.svg')] bg-cover bg-center">
+        <div className="bg-white/80 backdrop-blur-xl p-8 rounded-2xl shadow-xl border border-white/50">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Memuat dashboard...</p>
         </div>
       </div>
     )
@@ -215,216 +205,245 @@ export default function StudentDashboard() {
   const formData = registration?.form_data
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[url('/grid-pattern.svg')] bg-cover bg-center relative font-sans">
+      {/* Ambient Background */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-50/90 via-white/80 to-indigo-50/90 -z-10"></div>
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-indigo-200/20 rounded-full blur-[100px] -z-10"></div>
+
       {/* Header */}
-      <header className="bg-white shadow">
+      <header className="sticky top-0 z-50 bg-white/70 backdrop-blur-xl border-b border-white/50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-6 gap-4">
-            <div className="flex items-center">
-              <div className="w-10 h-10 bg-gradient-to-r from-primary-500 to-secondary-500 rounded-lg flex items-center justify-center text-white font-bold text-xl mr-3">
+          <div className="flex justify-between items-center h-20">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-500/20">
                 YS
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">Dashboard Siswa</h1>
-                <p className="text-sm text-gray-600">Platform Pendaftaran Yuksekolah</p>
+                <h1 className="text-lg font-bold text-gray-900 leading-tight">Dashboard Siswa</h1>
+                <p className="text-xs text-indigo-600 font-medium tracking-wide uppercase">Yuksekolah Portal</p>
               </div>
             </div>
+
             <div className="flex items-center gap-4">
-              <div className="text-right">
-                <div className="text-sm font-medium text-gray-900">{user?.name}</div>
-                <div className="text-xs text-gray-500">{user?.email}</div>
+              <div className="hidden sm:block text-right">
+                <div className="text-sm font-bold text-gray-900">{user?.name}</div>
+                <div className="text-xs text-gray-500 font-medium">{user?.email}</div>
+              </div>
+              <div className="h-10 w-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-700 font-bold border-2 border-white shadow-sm">
+                {user?.name?.charAt(0) || 'S'}
               </div>
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm"
+                className="p-2.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                title="Keluar"
               >
-                Keluar
+                <LogOut className="w-5 h-5" />
               </button>
             </div>
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         {error && (
-          <div className="mb-6 bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg">
-            <div className="flex items-center">
-              <span className="text-lg mr-2">⚠️</span>
-              <span>{error}</span>
-            </div>
+          <div className="mb-8 flex items-center bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl animate-fade-in-up">
+            <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" />
+            <span className="font-medium">{error}</span>
           </div>
         )}
 
-        {/* Welcome Card */}
-        <div className="mb-8 bg-gradient-to-r from-primary-600 to-secondary-600 rounded-2xl p-6 text-black shadow-lg">
-          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
-            <div>
-              <h2 className="text-2xl font-extrabold">Halo, {user?.name}!</h2>
-              <p className="mt-2 font-medium">
-                Pantau status pendaftaran Anda ke {registration?.school?.name || 'sekolah tujuan'}.
-              </p>
-            </div>
-            <div className="flex items-center gap-4 bg-white/20 backdrop-blur-sm rounded-xl p-4 border border-white/30">
-              <div className="text-3xl">{statusInfo.icon}</div>
+        {/* Welcome Banner */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+          {/* Main Welcome Card */}
+          <div className="lg:col-span-2 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-[2rem] p-8 text-white shadow-2xl shadow-indigo-500/20 relative overflow-hidden animate-fade-in-up">
+            {/* Decorative circles */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-400/20 rounded-full blur-2xl translate-y-1/2 -translate-x-1/2"></div>
+
+            <div className="relative z-10 h-full flex flex-col justify-between">
               <div>
-                <div className="text-sm font-semibold text-black">Status Saat Ini</div>
-                <div className="text-xl font-extrabold text-black">{statusInfo.title}</div>
+                <span className="inline-block px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-bold mb-4 border border-white/20">
+                  Tahun Ajaran {registration?.academic_year || '2024/2025'}
+                </span>
+                <h2 className="text-3xl font-extrabold mb-2 leading-tight">Halo, {user?.name?.split(' ')[0]}! 👋</h2>
+                <p className="text-indigo-100 text-lg max-w-md leading-relaxed">
+                  Pantau terus progres pendaftaran Anda di <span className="font-bold text-white">{registration?.school?.name || 'Sekolah Tujuan'}</span>.
+                </p>
+              </div>
+
+              <div className="mt-8 flex gap-3">
+                <div className="flex-1 bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+                  <div className="text-indigo-100 text-xs font-bold uppercase tracking-wider mb-1">Status</div>
+                  <div className="text-xl font-bold flex items-center gap-2">
+                    <statusInfo.icon className="w-5 h-5" />
+                    {statusInfo.title}
+                  </div>
+                </div>
+                <div className="flex-1 bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/10">
+                  <div className="text-indigo-100 text-xs font-bold uppercase tracking-wider mb-1">Program</div>
+                  <div className="text-xl font-bold">{registration?.program || '-'}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Stats / Timeline Card */}
+          <div className="bg-white/60 backdrop-blur-xl rounded-[2rem] p-8 border border-white/50 shadow-xl animate-fade-in-up animation-delay-300">
+            <h3 className="font-bold text-gray-900 mb-6 flex items-center">
+              <Clock className="w-5 h-5 mr-2 text-indigo-500" />
+              Timeline Pendaftaran
+            </h3>
+
+            <div className="relative space-y-6">
+              {/* Line */}
+              <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-indigo-100"></div>
+
+              <div className="relative pl-8">
+                <div className="absolute left-0 top-1 w-6 h-6 rounded-full bg-indigo-600 border-4 border-indigo-100"></div>
+                <div>
+                  <div className="text-sm font-bold text-gray-900">Pendaftaran Terkirim</div>
+                  <div className="text-xs text-gray-500 mt-0.5">
+                    {registration?.created_at ? new Date(registration.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : '-'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative pl-8">
+                <div className={`absolute left-0 top-1 w-6 h-6 rounded-full border-4 ${registration?.status !== 'draft' ? 'bg-indigo-600 border-indigo-100' : 'bg-gray-300 border-gray-100'
+                  }`}></div>
+                <div>
+                  <div className={`text-sm font-bold ${registration?.status !== 'draft' ? 'text-gray-900' : 'text-gray-400'}`}>Verifikasi Berkas</div>
+                  <div className="text-xs text-gray-500 mt-0.5">Oleh Admin Sekolah</div>
+                </div>
+              </div>
+
+              <div className="relative pl-8">
+                <div className={`absolute left-0 top-1 w-6 h-6 rounded-full border-4 ${['verified', 'rejected'].includes(registration?.status || '') ?
+                    (registration?.status === 'verified' ? 'bg-green-500 border-green-100' : 'bg-red-500 border-red-100')
+                    : 'bg-gray-300 border-gray-100'
+                  }`}></div>
+                <div>
+                  <div className={`text-sm font-bold ${['verified', 'rejected'].includes(registration?.status || '') ? 'text-gray-900' : 'text-gray-400'}`}>Pengumuman Hasil</div>
+                  <div className="text-xs text-gray-500 mt-0.5">
+                    {registration?.status === 'verified' ? 'Diterima' : registration?.status === 'rejected' ? 'Ditolak' : 'Menunggu'}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column - Status & Progress */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Status Card */}
-            <div className={`border-2 rounded-xl p-6 ${statusInfo.color}`}>
-              <div className="flex items-center gap-3 mb-4">
-                <div className="text-2xl">{statusInfo.icon}</div>
-                <h3 className="text-lg font-bold">Status Pendaftaran</h3>
-              </div>
-              <p className="mb-6">{statusInfo.message}</p>
+        <h3 className="text-xl font-bold text-gray-900 mb-6 px-2">Detail Informasi</h3>
 
-              <div className="space-y-3">
-                {statusInfo.steps.map((step, index) => (
-                  <div key={index} className="flex items-center gap-3">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step.startsWith('✅') ? 'bg-green-500 text-white' :
-                      step.startsWith('❌') ? 'bg-red-600 text-white' :
-                        step.startsWith('⏳') ? 'bg-yellow-500 text-white' :
-                          'bg-gray-200 text-black font-bold'
-                      }`}>
-                      {step.startsWith('✅') ? '✓' :
-                        step.startsWith('❌') ? '✗' :
-                          step.startsWith('⏳') ? '⌛' : '○'}
-                    </div>
-                    <span>{step.replace(/^[✅❌⏳📝📞]+/, '').trim()}</span>
-                  </div>
-                ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in-up animation-delay-500">
+          {/* School Info */}
+          <div className="bg-white/60 backdrop-blur-xl rounded-[2rem] p-8 border border-white/50 shadow-xl hover:shadow-2xl hover:bg-white/70 transition-all duration-300 group">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
+                <GraduationCap className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="font-bold text-gray-900 text-lg">Sekolah Tujuan</h4>
+                <p className="text-sm text-gray-500">Informasi Lembaga</p>
               </div>
             </div>
 
-            {/* School Information */}
-            {registration?.school && (
-              <div className="bg-white rounded-xl shadow p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Informasi Sekolah</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <div className="text-sm text-gray-500 mb-1">Nama Sekolah</div>
-                    <div className="font-medium">{registration.school.name}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500 mb-1">Email Kontak</div>
-                    <div className="font-medium">{registration.school.email}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500 mb-1">Telepon</div>
-                    <div className="font-medium">{registration.school.phone}</div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-gray-500 mb-1">Program/Jurusan</div>
-                    <div className="font-medium">{registration.program} - {registration.academic_year}</div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Right Column - Personal Info & Actions */}
-          <div className="space-y-8">
-            {/* Personal Information */}
-            <div className="bg-white rounded-xl shadow p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Data Pribadi</h3>
+            {registration?.school ? (
               <div className="space-y-4">
-                <div>
-                  <div className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Nama Lengkap</div>
-                  <div className="font-bold text-gray-900 text-lg">{formData?.name || user?.name}</div>
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Email</div>
-                  <div className="font-bold text-gray-900 text-lg">{formData?.email || user?.email}</div>
-                </div>
-                <div>
-                  <div className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Nomor Telepon</div>
-                  <div className="font-bold text-gray-900 text-lg">{formData?.phone || '08123456789'}</div>
-                </div>
-                {formData?.birth_place && formData?.birth_date && (
+                <div className="flex items-start gap-4 p-3 rounded-xl bg-white/50 border border-white">
+                  <div className="p-2 bg-gray-50 rounded-lg"><GraduationCap className="w-4 h-4 text-gray-500" /></div>
                   <div>
-                    <div className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">TTL</div>
-                    <div className="font-bold text-gray-900 text-lg">{formData.birth_place}, {formData.birth_date}</div>
+                    <div className="text-xs text-gray-500 font-semibold uppercase">Nama Sekolah</div>
+                    <div className="font-bold text-gray-900">{registration.school.name}</div>
                   </div>
-                )}
-                {formData?.address && (
+                </div>
+                <div className="flex items-start gap-4 p-3 rounded-xl bg-white/50 border border-white">
+                  <div className="p-2 bg-gray-50 rounded-lg"><Mail className="w-4 h-4 text-gray-500" /></div>
                   <div>
-                    <div className="text-xs font-bold text-gray-700 uppercase tracking-wide mb-1">Alamat</div>
-                    <div className="font-bold text-gray-900 text-lg">{formData.address}</div>
+                    <div className="text-xs text-gray-500 font-semibold uppercase">Email</div>
+                    <div className="font-medium text-gray-900">{registration.school.email}</div>
                   </div>
-                )}
-              </div>
-            </div>
-
-            {/* Quick Actions */}
-            <div className="bg-gradient-to-br from-primary-50 to-secondary-50 border border-primary-100 rounded-xl p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Aksi Cepat</h3>
-              <div className="space-y-3">
-                <button className="w-full px-4 py-3 bg-white border border-primary-200 text-primary-700 rounded-lg hover:bg-primary-50 transition flex items-center justify-center gap-2">
-                  <span>📄</span> Cetak Formulir
-                </button>
-                <button className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition flex items-center justify-center gap-2">
-                  <span>📧</span> Hubungi Sekolah
-                </button>
-                <button className="w-full px-4 py-3 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition flex items-center justify-center gap-2">
-                  <span>❓</span> Bantuan
-                </button>
-              </div>
-            </div>
-
-            {/* Timeline */}
-            {registration?.created_at && (
-              <div className="bg-white rounded-xl shadow p-6">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Timeline</h3>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center text-xs text-white mt-1">
-                      ✓
-                    </div>
-                    <div>
-                      <div className="font-medium">Pendaftaran Dikirim</div>
-                      <div className="text-sm text-gray-500">
-                        {new Date(registration.created_at).toLocaleDateString('id-ID', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs mt-1 ${registration.status === 'verified' ? 'bg-green-500 text-white' :
-                      registration.status === 'rejected' ? 'bg-red-500 text-white' :
-                        'bg-yellow-500 text-white'
-                      }`}>
-                      {registration.status === 'verified' ? '✓' :
-                        registration.status === 'rejected' ? '✗' : '⌛'}
-                    </div>
-                    <div>
-                      <div className="font-medium">Status: {statusInfo.title}</div>
-                      <div className="text-sm text-gray-500">
-                        {registration.updated_at ?
-                          new Date(registration.updated_at).toLocaleDateString('id-ID', {
-                            day: 'numeric',
-                            month: 'long'
-                          }) : 'Dalam proses'}
-                      </div>
-                    </div>
+                </div>
+                <div className="flex items-start gap-4 p-3 rounded-xl bg-white/50 border border-white">
+                  <div className="p-2 bg-gray-50 rounded-lg"><Phone className="w-4 h-4 text-gray-500" /></div>
+                  <div>
+                    <div className="text-xs text-gray-500 font-semibold uppercase">Telepon</div>
+                    <div className="font-medium text-gray-900">{registration.school.phone}</div>
                   </div>
                 </div>
               </div>
+            ) : (
+              <div className="text-center py-8 text-gray-400">Belum ada data sekolah</div>
             )}
           </div>
+
+          {/* Personal Info */}
+          <div className="bg-white/60 backdrop-blur-xl rounded-[2rem] p-8 border border-white/50 shadow-xl hover:shadow-2xl hover:bg-white/70 transition-all duration-300 group">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-12 h-12 bg-pink-100 rounded-2xl flex items-center justify-center text-pink-600 group-hover:scale-110 transition-transform">
+                <User className="w-6 h-6" />
+              </div>
+              <div>
+                <h4 className="font-bold text-gray-900 text-lg">Data Pendaftar</h4>
+                <p className="text-sm text-gray-500">Informasi Pribadi</p>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-start gap-4 p-3 rounded-xl bg-white/50 border border-white">
+                <div className="p-2 bg-gray-50 rounded-lg"><User className="w-4 h-4 text-gray-500" /></div>
+                <div>
+                  <div className="text-xs text-gray-500 font-semibold uppercase">Nama Lengkap</div>
+                  <div className="font-bold text-gray-900">{formData?.name || user?.name}</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-4 p-3 rounded-xl bg-white/50 border border-white">
+                <div className="p-2 bg-gray-50 rounded-lg"><Mail className="w-4 h-4 text-gray-500" /></div>
+                <div>
+                  <div className="text-xs text-gray-500 font-semibold uppercase">Email</div>
+                  <div className="font-medium text-gray-900">{formData?.email || user?.email}</div>
+                </div>
+              </div>
+              <div className="flex items-start gap-4 p-3 rounded-xl bg-white/50 border border-white">
+                <div className="p-2 bg-gray-50 rounded-lg"><MapPin className="w-4 h-4 text-gray-500" /></div>
+                <div>
+                  <div className="text-xs text-gray-500 font-semibold uppercase">Alamat</div>
+                  <div className="font-medium text-gray-900 truncate max-w-[200px]">{formData?.address || '-'}</div>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-      </main >
-    </div >
+
+        {/* Action Bar */}
+        <div className="mt-10 grid grid-cols-1 md:grid-cols-3 gap-4 animate-fade-in-up animation-delay-700">
+          <button className="flex items-center justify-center gap-2 p-4 rounded-xl bg-white/40 border border-white/40 hover:bg-white/60 transition-all font-bold text-gray-700 hover:text-indigo-600 hover:-translate-y-1">
+            <FileText className="w-5 h-5" /> Cetak Bukti Daftar
+          </button>
+          <button className="flex items-center justify-center gap-2 p-4 rounded-xl bg-white/40 border border-white/40 hover:bg-white/60 transition-all font-bold text-gray-700 hover:text-indigo-600 hover:-translate-y-1">
+            <HelpCircle className="w-5 h-5" /> Pusat Bantuan
+          </button>
+          <Link href="/" className="flex items-center justify-center gap-2 p-4 rounded-xl bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 transition-all font-bold text-indigo-700 hover:-translate-y-1">
+            Ke Halaman Utama
+          </Link>
+        </div>
+
+      </main>
+    </div>
+  )
+}
+
+export default function StudentDashboard() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[url('/grid-pattern.svg')] bg-cover bg-center">
+        <div className="bg-white/80 backdrop-blur-xl p-8 rounded-2xl shadow-xl border border-white/50">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 font-medium">Memuat dashboard...</p>
+        </div>
+      </div>
+    }>
+      <StudentDashboardContent />
+    </Suspense>
   )
 }
