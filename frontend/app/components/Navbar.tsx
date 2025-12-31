@@ -67,7 +67,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   href="/daftar-sekolah"
-                  className="bg-gradient-to-r from-primary-600 to-primary-700 text-white font-bold px-6 py-2.5 rounded-full hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                  className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-full hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
                 >
                   Daftar Sekolah
                 </Link>
@@ -129,7 +129,7 @@ export default function Navbar() {
                 </Link>
                 <Link
                   href="/daftar-sekolah"
-                  className="bg-primary-600 text-white px-4 py-3 rounded-xl font-bold text-center"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-3 rounded-xl font-bold text-center"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   Daftar Sekolah
