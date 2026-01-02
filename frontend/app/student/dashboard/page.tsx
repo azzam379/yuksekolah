@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { LogOut, GraduationCap, MapPin, Phone, Mail, User, Clock, FileText, CheckCircle, AlertCircle, HelpCircle } from 'lucide-react'
 import Link from 'next/link'
+import Logo from '@/app/components/Logo'
 
 interface School {
   id: number
@@ -215,11 +216,9 @@ function StudentDashboardContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-blue-500 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-indigo-500/20">
-                YS
-              </div>
+              <Logo />
+              <div className="hidden md:block border-l border-gray-300 mx-2 h-6"></div>
               <div>
-                <h1 className="text-lg font-bold text-gray-900 leading-tight">Dashboard Siswa</h1>
                 <p className="text-xs text-indigo-600 font-medium tracking-wide uppercase">Yuksekolah Portal</p>
               </div>
             </div>
@@ -319,8 +318,8 @@ function StudentDashboardContent() {
 
               <div className="relative pl-8">
                 <div className={`absolute left-0 top-1 w-6 h-6 rounded-full border-4 ${['verified', 'rejected'].includes(registration?.status || '') ?
-                    (registration?.status === 'verified' ? 'bg-green-500 border-green-100' : 'bg-red-500 border-red-100')
-                    : 'bg-gray-300 border-gray-100'
+                  (registration?.status === 'verified' ? 'bg-green-500 border-green-100' : 'bg-red-500 border-red-100')
+                  : 'bg-gray-300 border-gray-100'
                   }`}></div>
                 <div>
                   <div className={`text-sm font-bold ${['verified', 'rejected'].includes(registration?.status || '') ? 'text-gray-900' : 'text-gray-400'}`}>Pengumuman Hasil</div>

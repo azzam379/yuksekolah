@@ -8,6 +8,9 @@ const jakarta = Plus_Jakarta_Sans({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'Yuksekolah - Platform Pendaftaran Siswa',
   description: 'Platform pendaftaran siswa baru digital untuk sekolah Indonesia',
+  icons: {
+    icon: '/favicon.ico',
+  }
 }
 
 export default function RootLayout({

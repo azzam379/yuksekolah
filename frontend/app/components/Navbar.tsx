@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Menu, X } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
+import Logo from './Logo'
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -28,14 +29,9 @@ export default function Navbar() {
       <div className="container mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 group">
-            <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-secondary-500 rounded-xl flex items-center justify-center text-white font-bold shadow-lg transform group-hover:rotate-6 transition-transform">
-              YS
-            </div>
-            <span className={`text-xl font-bold transition-colors ${isScrolled ? 'text-gray-900' : 'text-gray-900'
-              }`}>
-              Yuksekolah
-            </span>
+          {/* Logo */}
+          <Link href="/" className="group">
+            <Logo />
           </Link>
 
           {/* Menu Desktop */}

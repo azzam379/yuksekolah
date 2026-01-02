@@ -5,6 +5,7 @@ import {
   Mail, Phone, MapPin, Heart
 } from 'lucide-react'
 import Link from 'next/link'
+import Logo from './Logo'
 
 const footerLinks = {
   Produk: [
@@ -52,13 +53,7 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="lg:col-span-2 space-y-6">
             <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-xl flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-primary-900/20">
-                YS
-              </div>
-              <div>
-                <h3 className="text-2xl font-bold tracking-tight">Yuksekolah</h3>
-                <p className="text-gray-300 text-sm">Platform Pendaftaran Digital</p>
-              </div>
+              <Logo className="text-white" />
             </div>
 
             <p className="text-gray-300 leading-relaxed">

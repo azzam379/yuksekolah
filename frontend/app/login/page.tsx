@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, ArrowLeft, Lock, Mail, AlertTriangle, ArrowRight } from 'lucide-react'
+import Logo from '../components/Logo'
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
@@ -52,8 +53,8 @@ export default function LoginPage() {
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-primary-500 via-blue-500 to-secondary-500"></div>
 
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary-600 to-blue-700 text-white shadow-lg shadow-primary-500/30 mb-6 transform rotate-3 hover:rotate-0 transition-all duration-300 group cursor-default">
-              <span className="font-extrabold text-2xl tracking-tighter group-hover:scale-110 transition-transform">YS</span>
+            <div className="flex justify-center mb-6">
+              <Logo className="scale-125" />
             </div>
             <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">
               Selamat Datang
