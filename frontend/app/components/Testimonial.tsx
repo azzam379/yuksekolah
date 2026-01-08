@@ -40,11 +40,11 @@ export default function Testimonial() {
 
   useEffect(() => {
     if (!autoplay) return
-    
+
     const interval = setInterval(() => {
       setCurrent(prev => (prev + 1) % testimonials.length)
     }, 5000)
-    
+
     return () => clearInterval(interval)
   }, [autoplay])
 
@@ -78,7 +78,7 @@ export default function Testimonial() {
             <div className="absolute top-8 right-8 text-primary-100 text-6xl">
               "
             </div>
-            
+
             {/* Carousel content */}
             <div className="mb-8">
               <div className="flex items-start mb-6">
@@ -87,19 +87,19 @@ export default function Testimonial() {
                 </div>
                 <div>
                   <h4 className="text-xl font-bold text-gray-900">{testimonials[current].name}</h4>
-                  <p className="text-gray-600 mb-2">{testimonials[current].role}</p>
+                  <p className="text-gray-700 mb-2">{testimonials[current].role}</p>
                   <div className="flex">
                     {[...Array(5)].map((_, i) => (
-                      <Star 
-                        key={i} 
-                        className={`w-4 h-4 ${i < testimonials[current].rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`} 
+                      <Star
+                        key={i}
+                        className={`w-4 h-4 ${i < testimonials[current].rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300'}`}
                       />
                     ))}
                   </div>
                 </div>
               </div>
-              
-              <p className="text-gray-700 text-lg italic">
+
+              <p className="text-gray-800 text-lg italic">
                 "{testimonials[current].content}"
               </p>
             </div>
@@ -119,16 +119,16 @@ export default function Testimonial() {
                   />
                 ))}
               </div>
-              
+
               <div className="flex space-x-4">
-                <button 
+                <button
                   onClick={prev}
                   className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition"
                   aria-label="Previous testimonial"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
-                <button 
+                <button
                   onClick={next}
                   className="p-2 rounded-full bg-gray-100 hover:bg-gray-200 transition"
                   aria-label="Next testimonial"
@@ -149,7 +149,7 @@ export default function Testimonial() {
             ].map((stat, i) => (
               <div key={i} className="text-center p-6 bg-white rounded-2xl shadow-sm border">
                 <div className="text-3xl font-bold text-gray-900 mb-2">{stat.value}</div>
-                <div className="text-gray-600">{stat.label}</div>
+                <div className="text-gray-700">{stat.label}</div>
               </div>
             ))}
           </div>

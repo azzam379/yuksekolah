@@ -39,7 +39,7 @@ export default function ForSchool() {
             Transformasi Digital untuk
             <span className="block text-primary-600">Penerimaan Siswa Baru</span>
           </h2>
-          <p className="text-gray-600 text-lg">
+          <p className="text-gray-700 text-lg">
             Hemat waktu, kurangi kesalahan administrasi, berikan pengalaman terbaik untuk calon siswa.
           </p>
         </div>
@@ -55,7 +55,7 @@ export default function ForSchool() {
               </div>
               <div className="text-sm font-semibold text-gray-400 mb-2">STEP {item.step}</div>
               <h3 className="text-xl font-bold text-gray-900 mb-3">{item.title}</h3>
-              <p className="text-gray-600 mb-6">{item.desc}</p>
+              <p className="text-gray-700 mb-6">{item.desc}</p>
               <div className="h-1 w-12 bg-gradient-to-r from-gray-200 to-gray-300 group-hover:from-primary-500 group-hover:to-secondary-500 transition-all"></div>
             </div>
           ))}
@@ -64,7 +64,7 @@ export default function ForSchool() {
         <div className="text-center">
           <Link
             href="/daftar-sekolah"
-            className="inline-flex items-center bg-gradient-to-r from-primary-600 to-secondary-600 text-black px-8 py-4 rounded-xl text-lg font-semibold hover:shadow-xl transition-all group"
+            className="inline-flex items-center bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:shadow-xl transition-all group"
           >
             Daftarkan Sekolah Anda Sekarang
             <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform" />
