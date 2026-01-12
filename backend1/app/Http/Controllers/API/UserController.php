@@ -15,7 +15,6 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        // Only Super Admin
         if (!$request->user()->isSuperAdmin()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
@@ -51,28 +50,78 @@ class UserController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Prevent self-ban
+        // Prevent self-block
         if ($request->user()->id == $id) {
             return response()->json(['error' => 'Cannot block yourself'], 422);
         }
 
         $user = User::findOrFail($id);
 
-        // Toggle strict block/active status
-        // For simplicity, we might assume a 'status' column exists or add one.
-        // Assuming 'email_verified_at' as a soft switch for now or adding a new column.
-        // Let's verify schema first. For now, I'll implement a simple password scramble as "Block" if no status column,
-        // BUT ideally we should add a 'is_active' column.
-        // Checking User model... defaulting to password scramble for "Block" is risky.
-        // Let's assume we will add 'is_active' column in a migration or use a workaround.
-        // Workaround: We will use a cache lock or a specific flag.
-        // Better: Let's stick to Reset Password for now as the "Nuclear Option" and simply
-        // return a "Features not fully implemented" for block if DB field missing.
+        // Toggle is_active status
+        $user->is_active = !$user->is_active;
+        $user->save();
 
-        // WAIT: I should check if 'users' table has status.
-        // I'll stick to a simple "Reset Password" first which is requested.
+        $status = $user->is_active ? 'unblocked' : 'blocked';
 
-        return response()->json(['message' => 'Feature coming soon (requires DB migration)'], 501);
+        return response()->json([
+            'message' => "User successfully {$status}",
+            'user' => $user,
+            'is_active' => $user->is_active
+        ]);
+    }
+
+    /**
+     * Update user profile
+     */
+    public function update(Request $request, $id)
+    {
+        if (!$request->user()->isSuperAdmin()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $user = User::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'email' => 'sometimes|email|unique:users,email,' . $id,
+            'role' => 'sometimes|in:super_admin,school_admin,student',
+            'is_active' => 'sometimes|boolean',
+        ]);
+
+        $user->update($validated);
+
+        return response()->json([
+            'message' => 'User updated successfully',
+            'user' => $user
+        ]);
+    }
+
+    /**
+     * Delete user
+     */
+    public function destroy(Request $request, $id)
+    {
+        if (!$request->user()->isSuperAdmin()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Prevent self-deletion
+        if ($request->user()->id == $id) {
+            return response()->json(['error' => 'Cannot delete yourself'], 422);
+        }
+
+        $user = User::findOrFail($id);
+        $userName = $user->name;
+
+        // Delete associated tokens
+        $user->tokens()->delete();
+
+        // Delete user
+        $user->delete();
+
+        return response()->json([
+            'message' => "User '{$userName}' deleted successfully"
+        ]);
     }
 
     /**
@@ -93,9 +142,6 @@ class UserController extends Controller
             'password' => Hash::make($newPassword)
         ]);
 
-        // In a real app, email this to the user.
-        // For MVP/Admin usage, we return it to the admin.
-
         return response()->json([
             'message' => 'Password reset successfully',
             'new_password' => $newPassword,
@@ -103,3 +149,4 @@ class UserController extends Controller
         ]);
     }
 }
+

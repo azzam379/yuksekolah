@@ -46,6 +46,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
         // User Management
         Route::get('/users', [\App\Http\Controllers\API\UserController::class, 'index']);
+        Route::put('/users/{id}', [\App\Http\Controllers\API\UserController::class, 'update']);
+        Route::delete('/users/{id}', [\App\Http\Controllers\API\UserController::class, 'destroy']);
         Route::post('/users/{id}/block', [\App\Http\Controllers\API\UserController::class, 'toggleBlock']);
         Route::post('/users/{id}/reset-password', [\App\Http\Controllers\API\UserController::class, 'resetPassword']);
 
