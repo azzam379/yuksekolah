@@ -6,11 +6,22 @@ import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
 import { ArrowLeft, ArrowRight, User, BookOpen, MapPin, Users, CheckCircle, GraduationCap, AlertCircle, Clock, ShieldCheck, Check } from 'lucide-react'
 
-interface SchoolInfo {
+interface PeriodInfo {
   id: number
   name: string
-  email: string
+  academic_year: string
+  is_open: boolean
   programs: string[]
+  quota: number | null
+  registered_count: number
+  remaining_quota: number | null
+  can_register: boolean
+  school: {
+    id: number
+    name: string
+    address?: string
+    npsn?: string
+  }
 }
 
 interface FormData {
@@ -54,7 +65,7 @@ function StudentRegistrationContent() {
   const { user } = useAuth()
   const token = params.token as string
 
-  const [schoolInfo, setSchoolInfo] = useState<SchoolInfo | null>(null)
+  const [periodInfo, setPeriodInfo] = useState<PeriodInfo | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -87,31 +98,35 @@ function StudentRegistrationContent() {
     terms_accepted: false
   })
 
-  // Fetch school information based on token
+  // Fetch period information based on token
   useEffect(() => {
-    const fetchSchoolInfo = async () => {
+    const fetchPeriodInfo = async () => {
       try {
         setIsLoading(true)
-        const response = await fetch(`http://localhost:8000/api/school-by-link/${token}`)
+        const response = await fetch(`http://localhost:8000/api/period-by-link/${token}`)
 
         if (!response.ok) {
           if (response.status === 404) {
             throw new Error('Link pendaftaran tidak valid atau sudah kadaluarsa')
           }
-          throw new Error('Gagal memuat informasi sekolah')
+          throw new Error('Gagal memuat informasi pendaftaran')
         }
 
         const data = await response.json()
-        setSchoolInfo({
-          id: data.school.id,
-          name: data.school.name,
-          email: data.school.email,
-          programs: data.programs || ['IPA', 'IPS', 'Bahasa', 'Agama']
-        })
+        setPeriodInfo(data.data)
+
+        // Check if registration is open
+        if (!data.data.can_register) {
+          if (!data.data.is_open) {
+            setError('Pendaftaran untuk periode ini sudah ditutup')
+          } else {
+            setError('Kuota pendaftaran untuk periode ini sudah penuh')
+          }
+        }
 
         // Set default program if available
-        if (data.programs && data.programs.length > 0) {
-          setFormData(prev => ({ ...prev, program: data.programs[0] }))
+        if (data.data.programs && data.data.programs.length > 0) {
+          setFormData(prev => ({ ...prev, program: data.data.programs[0] }))
         }
 
       } catch (err: any) {
@@ -122,7 +137,7 @@ function StudentRegistrationContent() {
     }
 
     if (token) {
-      fetchSchoolInfo()
+      fetchPeriodInfo()
     }
   }, [token])
 
@@ -211,7 +226,7 @@ function StudentRegistrationContent() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          school_link: token,
+          period_link: token,
           form_data: {
             name: formData.full_name,
             email: formData.email,
@@ -276,7 +291,7 @@ function StudentRegistrationContent() {
 
   if (isLoading) return <LoadingState />
 
-  if (error && !schoolInfo) {
+  if (error && !periodInfo) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[url('/grid-pattern.svg')] bg-cover bg-center px-4 relative overflow-hidden">
         {/* Ambient Background */}
@@ -323,8 +338,11 @@ function StudentRegistrationContent() {
             <span className="text-sm font-medium">Kembali ke Beranda</span>
           </Link>
           <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-3 tracking-tight">Formulir Pendaftaran Siswa</h1>
-          <p className="text-lg text-gray-600 font-medium">{schoolInfo?.name}</p>
-          <p className="text-sm text-gray-500 mt-1">Tahun Ajaran 2024/2025</p>
+          <p className="text-lg text-gray-600 font-medium">{periodInfo?.school?.name}</p>
+          <p className="text-sm text-gray-500 mt-1">{periodInfo?.name} • Tahun Ajaran {periodInfo?.academic_year}</p>
+          {periodInfo?.quota && (
+            <p className="text-xs text-indigo-600 mt-2 font-medium">Kuota tersisa: {periodInfo.remaining_quota} dari {periodInfo.quota}</p>
+          )}
         </div>
 
         {/* Progress Steps (Hidden on success) */}
@@ -432,7 +450,7 @@ function StudentRegistrationContent() {
                 <div>
                   <label className="block text-sm font-bold text-gray-700 mb-2">Pilih Jurusan/Program <span className="text-red-500">*</span></label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {schoolInfo?.programs.map((prog) => (
+                    {periodInfo?.programs.map((prog) => (
                       <label key={prog} className={`p-4 border-2 rounded-xl cursor-pointer transition-all text-center font-bold ${formData.program === prog ? 'border-indigo-500 bg-indigo-50 text-indigo-700 shadow-md' : 'border-gray-200 hover:border-gray-300'}`}>
                         <input type="radio" name="program" value={prog} checked={formData.program === prog} onChange={handleChange} className="sr-only" />
                         {prog}
@@ -531,7 +549,7 @@ function StudentRegistrationContent() {
                 <div className="flex items-start bg-indigo-50 p-4 rounded-xl border border-indigo-100">
                   <input type="checkbox" id="terms" checked={formData.terms_accepted} onChange={(e) => setFormData({ ...formData, terms_accepted: e.target.checked })} className="mt-1 w-5 h-5 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500 cursor-pointer" />
                   <label htmlFor="terms" className="ml-3 text-sm text-gray-700 cursor-pointer">
-                    Saya menyatakan bahwa data yang saya isi adalah benar dan dapat dipertanggungjawabkan. Saya setuju dengan <span className="font-bold text-indigo-600">Syarat & Ketentuan</span> yang berlaku di {schoolInfo?.name}.
+                    Saya menyatakan bahwa data yang saya isi adalah benar dan dapat dipertanggungjawabkan. Saya setuju dengan <span className="font-bold text-indigo-600">Syarat & Ketentuan</span> yang berlaku di {periodInfo?.school?.name}.
                   </label>
                 </div>
               </div>

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Models\Registration;
+use App\Models\RegistrationPeriod;
 use App\Models\School;
 use App\Models\User;
 use App\Models\RegistrationFile;
@@ -13,27 +14,66 @@ use Illuminate\Support\Str;
 
 class RegistrationController extends Controller
 {
-    // Submit registration form (via school link)
-    // Submit registration form (via school link)
+    // Submit registration form (via period link or school link)
     public function submit(Request $request)
     {
         $validated = $request->validate([
-            'school_link' => 'required|string',
+            'period_link' => 'nullable|string',
+            'school_link' => 'nullable|string',
             'form_data' => 'required|array',
             'form_data.name' => 'required|string',
-            'form_data.email' => 'required|email', // Removed unique:users,email
+            'form_data.email' => 'required|email',
             'form_data.phone' => 'required|string',
-            'form_data.program' => 'required|string|in:IPA,IPS,Bahasa,Agama',
+            'form_data.program' => 'required|string',
         ]);
 
-        // Cari sekolah berdasarkan link (exact match OR suffix match for legacy data)
-        $link = $validated['school_link'];
-        $school = School::where(function ($q) use ($link) {
-            $q->where('registration_link', $link)
-                ->orWhere('registration_link', 'LIKE', "%/$link");
-        })
-            ->where('status', 'active')
-            ->firstOrFail();
+        // Determine if using period or school link
+        $period = null;
+        $school = null;
+        $academicYear = date('Y') . '/' . (date('Y') + 1);
+
+        if (!empty($validated['period_link'])) {
+            // New flow: via RegistrationPeriod
+            $period = RegistrationPeriod::where('registration_link', $validated['period_link'])->first();
+
+            if (!$period) {
+                return response()->json(['message' => 'Link pendaftaran tidak valid'], 404);
+            }
+
+            // Check if period is open
+            if (!$period->is_open) {
+                return response()->json(['message' => 'Pendaftaran untuk periode ini sudah ditutup'], 400);
+            }
+
+            // Check quota
+            if ($period->quota !== null && $period->registered_count >= $period->quota) {
+                return response()->json(['message' => 'Kuota pendaftaran untuk periode ini sudah penuh'], 400);
+            }
+
+            // Validate program is in period's programs list
+            if (!in_array($validated['form_data']['program'], $period->programs)) {
+                return response()->json(['message' => 'Program/jurusan tidak tersedia untuk periode ini'], 400);
+            }
+
+            $school = $period->school;
+            $academicYear = $period->academic_year;
+
+        } elseif (!empty($validated['school_link'])) {
+            // Legacy flow: via School link
+            $link = $validated['school_link'];
+            $school = School::where(function ($q) use ($link) {
+                $q->where('registration_link', $link)
+                    ->orWhere('registration_link', 'LIKE', "%/$link");
+            })
+                ->where('status', 'active')
+                ->first();
+
+            if (!$school) {
+                return response()->json(['message' => 'Link pendaftaran tidak valid atau sekolah belum aktif'], 404);
+            }
+        } else {
+            return response()->json(['message' => 'Link pendaftaran diperlukan'], 400);
+        }
 
         // Start Transaction
         \DB::beginTransaction();
@@ -45,41 +85,40 @@ class RegistrationController extends Controller
             $password = null;
 
             if ($existingUser) {
-                // Jika user sudah ada, cek apakah request ini dari user yang sudah login
                 $currentUser = auth('sanctum')->user();
 
                 if ($currentUser && $currentUser->id === $existingUser->id) {
-                    // User valid dan sedang login -> Gunakan user ini
                     $student = $existingUser;
                 } else {
                     \DB::rollBack();
-                    // User ada tapi tidak login / token salah -> Minta login
                     return response()->json([
                         'message' => 'Email sudah terdaftar. Silakan login terlebih dahulu untuk mendaftar ke sekolah baru.',
                         'code' => 'EMAIL_EXISTS'
                     ], 409);
                 }
             } else {
-                // User baru -> Create with Random Password
                 $password = \Illuminate\Support\Str::random(8);
                 $student = User::create([
                     'name' => $validated['form_data']['name'],
                     'email' => $validated['form_data']['email'],
                     'password' => Hash::make($password),
                     'role' => 'student',
-                    'school_id' => $school->id, // Set initial school
+                    'school_id' => $school->id,
                 ]);
             }
 
-            // Cek duplicate registration di sekolah yang sama
+            // Check duplicate registration
             $existingRegistration = Registration::where('student_id', $student->id)
                 ->where('school_id', $school->id)
+                ->when($period, function ($q) use ($period) {
+                    return $q->where('period_id', $period->id);
+                })
                 ->first();
 
             if ($existingRegistration) {
                 \DB::rollBack();
                 return response()->json([
-                    'message' => 'Anda sudah terdaftar di sekolah ini.',
+                    'message' => 'Anda sudah terdaftar di periode/sekolah ini.',
                     'registration_id' => $existingRegistration->id
                 ], 409);
             }
@@ -88,16 +127,21 @@ class RegistrationController extends Controller
             $registration = Registration::create([
                 'student_id' => $student->id,
                 'school_id' => $school->id,
+                'period_id' => $period?->id,
                 'program' => $validated['form_data']['program'],
-                'academic_year' => date('Y') . '/' . (date('Y') + 1),
+                'academic_year' => $academicYear,
                 'status' => 'submitted',
                 'form_data' => $validated['form_data'],
             ]);
 
+            // Increment period registered count
+            if ($period) {
+                $period->incrementRegistered();
+            }
+
             \DB::commit();
 
-            // Send welcome email (Queue capable)
-            // Only send if new user (password is generated)
+            // Send welcome email
             if ($password) {
                 try {
                     \Illuminate\Support\Facades\Mail::to($student->email)->send(
@@ -105,7 +149,6 @@ class RegistrationController extends Controller
                     );
                 } catch (\Throwable $e) {
                     \Log::error('Failed to send student registration email: ' . $e->getMessage());
-                    // Email fail shouldn't rollback registration
                 }
             }
 
@@ -123,6 +166,7 @@ class RegistrationController extends Controller
             throw $e;
         }
     }
+
 
     // Get registrations for school admin
     public function index(Request $request)
