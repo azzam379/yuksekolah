@@ -25,6 +25,21 @@ class RegistrationController extends Controller
             'form_data.email' => 'required|email',
             'form_data.phone' => 'required|string',
             'form_data.program' => 'required|string',
+            'form_data.birth_place' => 'nullable|string',
+            'form_data.birth_date' => 'nullable|string',
+            'form_data.gender' => 'nullable|string',
+            'form_data.previous_school' => 'nullable|string',
+            'form_data.previous_school_year' => 'nullable|string',
+            'form_data.address' => 'nullable|string',
+            'form_data.province' => 'nullable|string',
+            'form_data.city' => 'nullable|string',
+            'form_data.postal_code' => 'nullable|string',
+            'form_data.father_name' => 'nullable|string',
+            'form_data.father_phone' => 'nullable|string',
+            'form_data.father_job' => 'nullable|string',
+            'form_data.mother_name' => 'nullable|string',
+            'form_data.mother_phone' => 'nullable|string',
+            'form_data.mother_job' => 'nullable|string',
         ]);
 
         // Determine if using period or school link
