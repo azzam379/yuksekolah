@@ -2,22 +2,37 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, FileText, Settings, LogOut, School, CalendarDays } from 'lucide-react'
+import { LayoutDashboard, Users, Settings, LogOut, School, CalendarDays, ClipboardList, UserCheck } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function Sidebar() {
     const pathname = usePathname()
     const { logout, user } = useAuth()
 
-    const navigation = [
-        { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
-        { name: 'Periode PPDB', href: '/admin/periods', icon: CalendarDays },
-        { name: 'Siswa & PPDB', href: '/admin/students', icon: Users },
-        { name: 'Pengumuman', href: '/admin/announcements', icon: FileText },
-        { name: 'Pengaturan', href: '/admin/settings', icon: Settings },
+    const menuSections = [
+        {
+            title: 'Menu Utama',
+            items: [
+                { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+                { name: 'Periode PPDB', href: '/admin/periods', icon: CalendarDays },
+            ]
+        },
+        {
+            title: 'Siswa',
+            items: [
+                { name: 'Pendaftar', href: '/admin/students', icon: ClipboardList },
+                { name: 'Siswa Aktif', href: '/admin/verified-students', icon: UserCheck },
+            ]
+        },
+        {
+            title: 'Lainnya',
+            items: [
+                { name: 'Pengaturan', href: '/admin/settings', icon: Settings },
+            ]
+        }
     ]
 
-    const isActive = (href: string) => pathname.startsWith(href)
+    const isActive = (href: string) => pathname === href || pathname.startsWith(href + '/')
 
     return (
         <div className="hidden md:flex flex-col w-64 bg-white/80 backdrop-blur-xl border-r border-gray-100 min-h-screen fixed left-0 top-0 bottom-0 z-50">
@@ -41,28 +56,36 @@ export default function Sidebar() {
 
             {/* Navigation */}
             <div className="flex-1 flex flex-col overflow-y-auto px-3">
-                <nav className="space-y-1">
-                    <div className="px-3 mb-2 mt-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">Menu Utama</div>
-                    {navigation.map((item) => {
-                        const active = isActive(item.href)
-                        return (
-                            <Link
-                                key={item.name}
-                                href={item.href}
-                                className={`
-                  group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200
-                  ${active
-                                        ? 'bg-indigo-50 text-indigo-700 shadow-sm'
-                                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}
-                `}
-                            >
-                                <item.icon
-                                    className={`mr-3 h-4 w-4 flex-shrink-0 transition-colors ${active ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-500'}`}
-                                />
-                                {item.name}
-                            </Link>
-                        )
-                    })}
+                <nav className="space-y-4">
+                    {menuSections.map((section) => (
+                        <div key={section.title}>
+                            <div className="px-3 mb-2 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                                {section.title}
+                            </div>
+                            <div className="space-y-1">
+                                {section.items.map((item) => {
+                                    const active = isActive(item.href)
+                                    return (
+                                        <Link
+                                            key={item.name}
+                                            href={item.href}
+                                            className={`
+                                                group flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200
+                                                ${active
+                                                    ? 'bg-indigo-50 text-indigo-700 shadow-sm'
+                                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}
+                                            `}
+                                        >
+                                            <item.icon
+                                                className={`mr-3 h-4 w-4 flex-shrink-0 transition-colors ${active ? 'text-indigo-600' : 'text-gray-400 group-hover:text-gray-500'}`}
+                                            />
+                                            {item.name}
+                                        </Link>
+                                    )
+                                })}
+                            </div>
+                        </div>
+                    ))}
                 </nav>
             </div>
 
@@ -83,3 +106,4 @@ export default function Sidebar() {
         </div>
     )
 }
+
