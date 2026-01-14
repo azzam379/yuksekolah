@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
 import { ArrowLeft, ArrowRight, User, BookOpen, MapPin, Users, CheckCircle, GraduationCap, AlertCircle, Clock, ShieldCheck, Check } from 'lucide-react'
+import { PROVINCES, getCitiesByProvince, getProvinceName, getCityName } from '@/lib/indonesia-regions'
 
 interface PeriodInfo {
   id: number
@@ -237,7 +238,9 @@ function StudentRegistrationContent() {
             gender: formData.gender,
             previous_school: formData.previous_school,
             previous_school_year: formData.previous_school_year,
-            address: `${formData.address}, ${formData.city}, ${formData.province} ${formData.postal_code}`,
+            address: `${formData.address}, ${getCityName(formData.province, formData.city)}, ${getProvinceName(formData.province)} ${formData.postal_code}`.trim(),
+            province: getProvinceName(formData.province),
+            city: getCityName(formData.province, formData.city),
             father_name: formData.father_name,
             father_phone: formData.father_phone,
             father_job: formData.father_job,
@@ -481,19 +484,47 @@ function StudentRegistrationContent() {
                   <label className="block text-sm font-bold text-gray-700 mb-2">Alamat Jalan <span className="text-red-500">*</span></label>
                   <textarea name="address" value={formData.address} onChange={handleChange} rows={3} className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all font-medium text-gray-900 resize-none" placeholder="Nama Jalan, RT/RW, Kelurahan" required />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Kota/Kab <span className="text-red-500">*</span></label>
-                    <input type="text" name="city" value={formData.city} onChange={handleChange} className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all font-medium text-gray-900" required />
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">Provinsi <span className="text-red-500">*</span></label>
-                    <input type="text" name="province" value={formData.province} onChange={handleChange} className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all font-medium text-gray-900" required />
+                    <select
+                      name="province"
+                      value={formData.province}
+                      onChange={(e) => {
+                        setFormData({ ...formData, province: e.target.value, city: '' })
+                      }}
+                      className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all font-medium text-gray-900"
+                      required
+                    >
+                      <option value="">-- Pilih Provinsi --</option>
+                      {PROVINCES.map((prov) => (
+                        <option key={prov.id} value={prov.id}>{prov.name}</option>
+                      ))}
+                    </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Kode Pos</label>
-                    <input type="text" name="postal_code" value={formData.postal_code} onChange={handleChange} className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all font-medium text-gray-900" />
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Kota/Kabupaten <span className="text-red-500">*</span></label>
+                    <select
+                      name="city"
+                      value={formData.city}
+                      onChange={handleChange}
+                      className="w-full px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all font-medium text-gray-900 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      required
+                      disabled={!formData.province}
+                    >
+                      <option value="">-- Pilih Kota/Kabupaten --</option>
+                      {formData.province && getCitiesByProvince(formData.province).map((city) => (
+                        <option key={city.id} value={city.id}>{city.name}</option>
+                      ))}
+                    </select>
+                    {!formData.province && (
+                      <p className="text-xs text-gray-400 mt-1">Pilih provinsi terlebih dahulu</p>
+                    )}
                   </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">Kode Pos</label>
+                  <input type="text" name="postal_code" value={formData.postal_code} onChange={handleChange} className="w-full md:w-1/3 px-5 py-4 bg-white border border-gray-200 rounded-xl focus:ring-4 focus:ring-indigo-100 focus:border-indigo-500 transition-all font-medium text-gray-900" placeholder="12345" />
                 </div>
               </div>
             )}
