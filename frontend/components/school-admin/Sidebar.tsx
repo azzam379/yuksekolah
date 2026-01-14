@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, FileText, Settings, LogOut, School } from 'lucide-react'
+import { LayoutDashboard, Users, FileText, Settings, LogOut, School, CalendarDays } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
 
 export default function Sidebar() {
@@ -11,6 +11,7 @@ export default function Sidebar() {
 
     const navigation = [
         { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
+        { name: 'Periode PPDB', href: '/admin/periods', icon: CalendarDays },
         { name: 'Siswa & PPDB', href: '/admin/students', icon: Users },
         { name: 'Pengumuman', href: '/admin/announcements', icon: FileText },
         { name: 'Pengaturan', href: '/admin/settings', icon: Settings },
