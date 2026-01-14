@@ -6,6 +6,7 @@ use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\API\SchoolController;
 use App\Http\Controllers\API\RegistrationController;
 use App\Http\Controllers\API\DashboardController;
+use App\Http\Controllers\API\RegistrationPeriodController;
 
 
 // Public routes (tidak butuh authentication)
@@ -15,6 +16,9 @@ Route::post('/login', [AuthController::class, 'login']);
 // Form submission via school link (public)
 Route::post('/submit-registration', [RegistrationController::class, 'submit']);
 Route::get('/school-by-link/{link}', [SchoolController::class, 'getByLink']);
+
+// Public: Get period by registration link
+Route::get('/period-by-link/{link}', [RegistrationPeriodController::class, 'getByLink']);
 
 // Protected routes (butuh authentication)
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -31,6 +35,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/registrations', [RegistrationController::class, 'index']);
     Route::post('/registrations/{id}/status', [RegistrationController::class, 'updateStatus']);
     Route::post('/registrations/{id}/upload', [RegistrationController::class, 'uploadFile']);
+
+    // Registration Periods (school_admin)
+    Route::prefix('periods')->group(function () {
+        Route::get('/', [RegistrationPeriodController::class, 'index']);
+        Route::post('/', [RegistrationPeriodController::class, 'store']);
+        Route::put('/{id}', [RegistrationPeriodController::class, 'update']);
+        Route::delete('/{id}', [RegistrationPeriodController::class, 'destroy']);
+        Route::post('/{id}/toggle-status', [RegistrationPeriodController::class, 'toggleStatus']);
+        Route::post('/{id}/regenerate-link', [RegistrationPeriodController::class, 'regenerateLink']);
+    });
 
     // Schools (admin access)
     Route::prefix('schools')->group(function () {
