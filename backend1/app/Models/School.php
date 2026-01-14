@@ -36,6 +36,12 @@ class School extends Model
         return $this->hasMany(Registration::class);
     }
 
+    // Relasi ke registration periods
+    public function periods()
+    {
+        return $this->hasMany(RegistrationPeriod::class);
+    }
+
     // Generate registration link
     public function generateRegistrationLink()
     {

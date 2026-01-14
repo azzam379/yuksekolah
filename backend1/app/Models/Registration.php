@@ -10,7 +10,13 @@ class Registration extends Model
     use HasFactory;
 
     protected $fillable = [
-        'student_id', 'school_id', 'program', 'academic_year', 'status', 'form_data'
+        'student_id',
+        'school_id',
+        'period_id',
+        'program',
+        'academic_year',
+        'status',
+        'form_data'
     ];
 
     protected $casts = [
@@ -27,6 +33,12 @@ class Registration extends Model
     public function school()
     {
         return $this->belongsTo(School::class);
+    }
+
+    // Relasi ke periode pendaftaran
+    public function period()
+    {
+        return $this->belongsTo(RegistrationPeriod::class, 'period_id');
     }
 
     // Relasi ke files
