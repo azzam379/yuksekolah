@@ -548,6 +548,21 @@ export default function PeriodsPage() {
                     </div>
                 </div>
             )}
+
+            {/* Toast Popup - Bottom Right */}
+            {copiedId && (
+                <div className="fixed bottom-6 right-6 z-50 animate-fade-in-up">
+                    <div className="flex items-center gap-3 px-5 py-3 bg-green-600 text-white rounded-xl shadow-2xl">
+                        <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                            <Check className="w-5 h-5" />
+                        </div>
+                        <div>
+                            <p className="font-bold text-sm">Link Berhasil Disalin!</p>
+                            <p className="text-xs text-green-100">Bagikan link ini kepada calon siswa</p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }
