@@ -174,10 +174,15 @@ class RegistrationController extends Controller
         $user = $request->user();
 
         if ($user->isSchoolAdmin()) {
-            $registrations = Registration::with('student')
-                ->where('school_id', $user->school_id)
-                ->orderBy('created_at', 'desc')
-                ->paginate(20);
+            $query = Registration::with(['student', 'period:id,name,academic_year'])
+                ->where('school_id', $user->school_id);
+
+            // Filter by period_id if provided
+            if ($request->has('period_id') && $request->period_id !== 'all') {
+                $query->where('period_id', $request->period_id);
+            }
+
+            $registrations = $query->orderBy('created_at', 'desc')->paginate(20);
         } elseif ($user->isStudent()) {
             $registrations = $user->registrations()->with('school')->paginate(10);
         } else {

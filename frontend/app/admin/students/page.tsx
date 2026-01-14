@@ -11,6 +11,12 @@ interface Registration {
     academic_year: string
     status: 'submitted' | 'verified' | 'rejected'
     created_at: string
+    period_id: number | null
+    period?: {
+        id: number
+        name: string
+        academic_year: string
+    }
     form_data: {
         name: string
         email: string
@@ -27,12 +33,24 @@ interface Registration {
     }
 }
 
+interface Period {
+    id: number
+    name: string
+    academic_year: string
+    is_open: boolean
+    ended_at: string | null
+}
+
 export default function StudentsManagementPage() {
     const { token } = useAuth()
     const [registrations, setRegistrations] = useState<Registration[]>([])
+    const [periods, setPeriods] = useState<Period[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [statusFilter, setStatusFilter] = useState('all')
+    const [periodFilter, setPeriodFilter] = useState('all')
     const [searchTerm, setSearchTerm] = useState('')
+
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'
 
     // Modal states
     const [selectedReg, setSelectedReg] = useState<Registration | null>(null)
@@ -41,10 +59,35 @@ export default function StudentsManagementPage() {
     const [actionLoading, setActionLoading] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
+    // Fetch periods for filter dropdown
+    const fetchPeriods = async () => {
+        try {
+            const response = await fetch(`${API_URL}/periods`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            if (response.ok) {
+                const data = await response.json()
+                // Sort: active first, then by created_at
+                const sorted = (data.data || []).sort((a: Period, b: Period) => {
+                    if (a.is_open && !b.is_open) return -1
+                    if (!a.is_open && b.is_open) return 1
+                    return 0
+                })
+                setPeriods(sorted)
+            }
+        } catch (error) {
+            console.error('Error fetching periods:', error)
+        }
+    }
+
     const fetchRegistrations = async () => {
         try {
             setIsLoading(true)
-            const response = await fetch('http://localhost:8000/api/registrations', {
+            let url = `${API_URL}/registrations`
+            if (periodFilter !== 'all') {
+                url += `?period_id=${periodFilter}`
+            }
+            const response = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             if (!response.ok) throw new Error('Gagal mengambil data')
@@ -59,8 +102,14 @@ export default function StudentsManagementPage() {
     }
 
     useEffect(() => {
-        if (token) fetchRegistrations()
+        if (token) {
+            fetchPeriods()
+        }
     }, [token])
+
+    useEffect(() => {
+        if (token) fetchRegistrations()
+    }, [token, periodFilter])
 
     // Update status (verify/reject)
     const handleUpdateStatus = async () => {
@@ -144,6 +193,21 @@ export default function StudentsManagementPage() {
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-gray-400" />
+                        <select
+                            className="p-2 border rounded-lg text-sm min-w-[180px]"
+                            value={periodFilter}
+                            onChange={(e) => setPeriodFilter(e.target.value)}
+                        >
+                            <option value="all">Semua Periode</option>
+                            {periods.map((period) => (
+                                <option key={period.id} value={period.id}>
+                                    {period.is_open ? '★ ' : ''}{period.name} {period.ended_at ? '(Selesai)' : ''}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     <div className="flex items-center gap-2">
                         <Filter className="w-4 h-4 text-gray-400" />
