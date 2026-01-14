@@ -14,6 +14,7 @@ interface Period {
     registration_link: string
     programs: string[]
     created_at: string
+    ended_at: string | null
 }
 
 export default function PeriodsPage() {
@@ -27,6 +28,7 @@ export default function PeriodsPage() {
     const [showCreateModal, setShowCreateModal] = useState(false)
     const [showEditModal, setShowEditModal] = useState(false)
     const [showDeleteModal, setShowDeleteModal] = useState(false)
+    const [showEndModal, setShowEndModal] = useState(false)
     const [selectedPeriod, setSelectedPeriod] = useState<Period | null>(null)
 
     // Form state
@@ -119,6 +121,7 @@ export default function PeriodsPage() {
 
     // Toggle Status
     const handleToggle = async (period: Period) => {
+        if (period.ended_at) return // Cannot toggle ended periods
         try {
             setActionLoading(period.id)
             const response = await fetch(`${API_URL}/periods/${period.id}/toggle-status`, {
@@ -126,8 +129,35 @@ export default function PeriodsPage() {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             if (response.ok) fetchPeriods()
+            else {
+                const data = await response.json()
+                alert(data.message || 'Gagal mengubah status')
+            }
         } catch (error) {
             console.error('Error toggling:', error)
+        } finally {
+            setActionLoading(null)
+        }
+    }
+
+    // End Period
+    const handleEndPeriod = async () => {
+        if (!selectedPeriod) return
+        try {
+            setActionLoading(selectedPeriod.id)
+            const response = await fetch(`${API_URL}/periods/${selectedPeriod.id}/end`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            if (response.ok) {
+                setShowEndModal(false)
+                fetchPeriods()
+            } else {
+                const data = await response.json()
+                alert(data.message || 'Gagal mengakhiri periode')
+            }
+        } catch (error) {
+            console.error('Error ending period:', error)
         } finally {
             setActionLoading(null)
         }
@@ -244,23 +274,29 @@ export default function PeriodsPage() {
                     {periods.map((period) => (
                         <div key={period.id} className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
                             {/* Header */}
-                            <div className="p-4 border-b border-gray-100">
+                            <div className={`p-4 border-b border-gray-100 ${period.ended_at ? 'bg-gray-50' : ''}`}>
                                 <div className="flex items-start justify-between">
                                     <div>
-                                        <h3 className="font-bold text-gray-900">{period.name}</h3>
+                                        <h3 className={`font-bold ${period.ended_at ? 'text-gray-500' : 'text-gray-900'}`}>{period.name}</h3>
                                         <p className="text-sm text-gray-500">{period.academic_year}</p>
                                     </div>
-                                    <button
-                                        onClick={() => handleToggle(period)}
-                                        disabled={actionLoading === period.id}
-                                        className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 transition ${period.is_open
-                                            ? 'bg-green-50 text-green-700 border border-green-200'
-                                            : 'bg-gray-100 text-gray-600 border border-gray-200'
-                                            }`}
-                                    >
-                                        {period.is_open ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
-                                        {period.is_open ? 'Buka' : 'Tutup'}
-                                    </button>
+                                    {period.ended_at ? (
+                                        <span className="px-3 py-1 rounded-full text-xs font-bold bg-gray-200 text-gray-600 border border-gray-300">
+                                            Selesai
+                                        </span>
+                                    ) : (
+                                        <button
+                                            onClick={() => handleToggle(period)}
+                                            disabled={actionLoading === period.id}
+                                            className={`px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 transition ${period.is_open
+                                                ? 'bg-green-50 text-green-700 border border-green-200'
+                                                : 'bg-gray-100 text-gray-600 border border-gray-200'
+                                                }`}
+                                        >
+                                            {period.is_open ? <ToggleRight className="w-4 h-4" /> : <ToggleLeft className="w-4 h-4" />}
+                                            {period.is_open ? 'Buka' : 'Tutup'}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
@@ -318,17 +354,29 @@ export default function PeriodsPage() {
 
                             {/* Actions */}
                             <div className="p-3 border-t border-gray-100 bg-gray-50/30 flex justify-end gap-1">
-                                <button
-                                    onClick={() => openEditModal(period)}
-                                    className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
-                                    title="Edit"
-                                >
-                                    <Edit className="w-4 h-4" />
-                                </button>
+                                {!period.ended_at && (
+                                    <>
+                                        <button
+                                            onClick={() => openEditModal(period)}
+                                            className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"
+                                            title="Edit"
+                                        >
+                                            <Edit className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                            onClick={() => { setSelectedPeriod(period); setShowEndModal(true) }}
+                                            className="p-2 text-gray-400 hover:text-orange-600 hover:bg-orange-50 rounded-lg transition"
+                                            title="Akhiri Periode"
+                                        >
+                                            <CalendarDays className="w-4 h-4" />
+                                        </button>
+                                    </>
+                                )}
                                 <button
                                     onClick={() => { setSelectedPeriod(period); setShowDeleteModal(true) }}
                                     className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"
                                     title="Hapus"
+                                    disabled={period.registered_count > 0}
                                 >
                                     <Trash2 className="w-4 h-4" />
                                 </button>
@@ -446,6 +494,55 @@ export default function PeriodsPage() {
                                 className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50"
                             >
                                 {actionLoading === selectedPeriod.id ? 'Menghapus...' : 'Hapus'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* End Period Modal */}
+            {showEndModal && selectedPeriod && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+                        <div className="flex items-center gap-3 mb-4">
+                            <div className="w-12 h-12 rounded-full bg-orange-100 flex items-center justify-center">
+                                <AlertTriangle className="w-6 h-6 text-orange-600" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-bold text-gray-900">Akhiri Periode?</h3>
+                                <p className="text-sm text-gray-500">{selectedPeriod.name}</p>
+                            </div>
+                        </div>
+                        <div className="bg-orange-50 border border-orange-100 rounded-lg p-4 mb-6">
+                            <p className="text-sm text-orange-700">
+                                <strong>⚠️ Perhatian:</strong> Periode yang sudah diakhiri <strong>tidak dapat dibuka kembali</strong>. Anda hanya bisa melihat data dan laporan yang sudah ada.
+                            </p>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                            <div className="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <p className="text-gray-500">Total Pendaftar</p>
+                                    <p className="font-bold text-gray-900">{selectedPeriod.registered_count}</p>
+                                </div>
+                                <div>
+                                    <p className="text-gray-500">Kuota</p>
+                                    <p className="font-bold text-gray-900">{selectedPeriod.quota || 'Tidak terbatas'}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowEndModal(false)}
+                                className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={handleEndPeriod}
+                                disabled={actionLoading === selectedPeriod.id}
+                                className="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50"
+                            >
+                                {actionLoading === selectedPeriod.id ? 'Mengakhiri...' : 'Ya, Akhiri Periode'}
                             </button>
                         </div>
                     </div>
