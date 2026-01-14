@@ -102,7 +102,7 @@ class RegistrationPeriodController extends Controller
     }
 
     /**
-     * Toggle open/close status
+     * Toggle open/close status (only one period can be active at a time)
      */
     public function toggleStatus(Request $request, $id)
     {
@@ -116,11 +116,97 @@ class RegistrationPeriodController extends Controller
             return response()->json(['message' => 'Periode tidak ditemukan'], 404);
         }
 
-        $period->update(['is_open' => !$period->is_open]);
+        // Cannot toggle if period has ended
+        if ($period->isEnded()) {
+            return response()->json(['message' => 'Periode yang sudah diakhiri tidak dapat diubah'], 400);
+        }
+
+        $newStatus = !$period->is_open;
+
+        // If activating, deactivate all other periods first
+        if ($newStatus === true) {
+            RegistrationPeriod::where('school_id', $user->school_id)
+                ->where('id', '!=', $id)
+                ->whereNull('ended_at')
+                ->update(['is_open' => false]);
+        }
+
+        $period->update(['is_open' => $newStatus]);
 
         return response()->json([
             'status' => 'success',
-            'message' => $period->is_open ? 'Pendaftaran dibuka' : 'Pendaftaran ditutup',
+            'message' => $newStatus ? 'Pendaftaran dibuka' : 'Pendaftaran ditutup',
+            'data' => $period->fresh()
+        ]);
+    }
+
+    /**
+     * Get active period for dashboard
+     */
+    public function getActive(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user->role !== 'school_admin') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $period = RegistrationPeriod::where('school_id', $user->school_id)
+            ->where('is_open', true)
+            ->whereNull('ended_at')
+            ->first();
+
+        if (!$period) {
+            return response()->json([
+                'status' => 'success',
+                'data' => null,
+                'message' => 'Tidak ada periode aktif'
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'id' => $period->id,
+                'name' => $period->name,
+                'academic_year' => $period->academic_year,
+                'is_open' => $period->is_open,
+                'quota' => $period->quota,
+                'registered_count' => $period->registered_count,
+                'remaining_quota' => $period->remaining_quota,
+                'programs' => $period->programs,
+                'registration_link' => $period->registration_link,
+            ]
+        ]);
+    }
+
+    /**
+     * End a period (cannot be reopened)
+     */
+    public function endPeriod(Request $request, $id)
+    {
+        $user = $request->user();
+
+        $period = RegistrationPeriod::where('id', $id)
+            ->where('school_id', $user->school_id)
+            ->first();
+
+        if (!$period) {
+            return response()->json(['message' => 'Periode tidak ditemukan'], 404);
+        }
+
+        if ($period->isEnded()) {
+            return response()->json(['message' => 'Periode sudah diakhiri sebelumnya'], 400);
+        }
+
+        $period->update([
+            'is_open' => false,
+            'ended_at' => now()
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Periode berhasil diakhiri. Periode tidak dapat dibuka kembali.',
             'data' => $period->fresh()
         ]);
     }

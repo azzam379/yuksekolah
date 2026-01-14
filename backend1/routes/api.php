@@ -39,10 +39,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Registration Periods (school_admin)
     Route::prefix('periods')->group(function () {
         Route::get('/', [RegistrationPeriodController::class, 'index']);
+        Route::get('/active', [RegistrationPeriodController::class, 'getActive']);
         Route::post('/', [RegistrationPeriodController::class, 'store']);
         Route::put('/{id}', [RegistrationPeriodController::class, 'update']);
         Route::delete('/{id}', [RegistrationPeriodController::class, 'destroy']);
         Route::post('/{id}/toggle-status', [RegistrationPeriodController::class, 'toggleStatus']);
+        Route::post('/{id}/end', [RegistrationPeriodController::class, 'endPeriod']);
         Route::post('/{id}/regenerate-link', [RegistrationPeriodController::class, 'regenerateLink']);
     });
 

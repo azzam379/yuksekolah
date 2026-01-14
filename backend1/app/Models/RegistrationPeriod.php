@@ -18,7 +18,8 @@ class RegistrationPeriod extends Model
         'quota',
         'registered_count',
         'registration_link',
-        'programs'
+        'programs',
+        'ended_at'
     ];
 
     protected $casts = [
@@ -26,7 +27,14 @@ class RegistrationPeriod extends Model
         'programs' => 'array',
         'quota' => 'integer',
         'registered_count' => 'integer',
+        'ended_at' => 'datetime',
     ];
+
+    // Check if period has ended (archived)
+    public function isEnded()
+    {
+        return $this->ended_at !== null;
+    }
 
     // Relasi ke sekolah
     public function school()
