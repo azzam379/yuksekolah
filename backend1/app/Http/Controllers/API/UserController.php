@@ -21,6 +21,7 @@ class UserController extends Controller
 
         $search = $request->query('search');
         $role = $request->query('role');
+        $schoolId = $request->query('school_id');
         $limit = $request->query('limit', 20);
 
         $query = User::with('school:id,name');
@@ -34,6 +35,10 @@ class UserController extends Controller
 
         if ($role) {
             $query->where('role', $role);
+        }
+
+        if ($schoolId && $schoolId !== 'all') {
+            $query->where('school_id', $schoolId);
         }
 
         $users = $query->orderBy('created_at', 'desc')->paginate($limit);

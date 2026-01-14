@@ -2,7 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { Search, Filter, Plus, Shield, Mail, UserCheck, Trash2, Key, Ban, X, Check } from 'lucide-react'
+import { Search, Filter, Shield, Mail, UserCheck, Trash2, Key, Ban, X, Check, School, Users, Calendar, Building2 } from 'lucide-react'
+
+interface UserSchool {
+    id: number
+    name: string
+}
 
 interface User {
     id: number
@@ -11,16 +16,26 @@ interface User {
     role: string
     is_active: boolean
     created_at: string
+    school_id: number | null
+    school: UserSchool | null
+}
+
+interface SchoolOption {
+    id: number
+    name: string
 }
 
 export default function UserManagementPage() {
     const { token } = useAuth()
     const [users, setUsers] = useState<User[]>([])
+    const [schools, setSchools] = useState<SchoolOption[]>([])
     const [isLoading, setIsLoading] = useState(true)
     const [searchTerm, setSearchTerm] = useState('')
     const [roleFilter, setRoleFilter] = useState('all')
+    const [schoolFilter, setSchoolFilter] = useState('all')
 
     // Modal states
+    const [selectedUser, setSelectedUser] = useState<User | null>(null)
     const [editingUser, setEditingUser] = useState<User | null>(null)
     const [deletingUser, setDeletingUser] = useState<User | null>(null)
     const [resetPasswordUser, setResetPasswordUser] = useState<User | null>(null)
@@ -28,10 +43,31 @@ export default function UserManagementPage() {
     const [actionLoading, setActionLoading] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'
+
+    const fetchSchools = async () => {
+        try {
+            const response = await fetch(`${API_URL}/schools`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            if (response.ok) {
+                const data = await response.json()
+                setSchools((data.data || []).map((s: any) => ({ id: s.id, name: s.name })))
+            }
+        } catch (error) {
+            console.error('Error fetching schools:', error)
+        }
+    }
+
     const fetchUsers = async () => {
         try {
             setIsLoading(true)
-            const response = await fetch('http://localhost:8000/api/users', {
+            let url = `${API_URL}/users`
+            const params = new URLSearchParams()
+            if (schoolFilter !== 'all') params.append('school_id', schoolFilter)
+            if (params.toString()) url += `?${params.toString()}`
+
+            const response = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             if (!response.ok) throw new Error('Gagal mengambil data user')
@@ -46,14 +82,20 @@ export default function UserManagementPage() {
     }
 
     useEffect(() => {
-        if (token) fetchUsers()
+        if (token) {
+            fetchSchools()
+        }
     }, [token])
+
+    useEffect(() => {
+        if (token) fetchUsers()
+    }, [token, schoolFilter])
 
     // Block/Unblock User
     const handleToggleBlock = async (user: User) => {
         setActionLoading(true)
         try {
-            const response = await fetch(`http://localhost:8000/api/users/${user.id}/block`, {
+            const response = await fetch(`${API_URL}/users/${user.id}/block`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             })
@@ -73,7 +115,7 @@ export default function UserManagementPage() {
         if (!resetPasswordUser) return
         setActionLoading(true)
         try {
-            const response = await fetch(`http://localhost:8000/api/users/${resetPasswordUser.id}/reset-password`, {
+            const response = await fetch(`${API_URL}/users/${resetPasswordUser.id}/reset-password`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` }
             })
@@ -93,7 +135,7 @@ export default function UserManagementPage() {
         if (!deletingUser) return
         setActionLoading(true)
         try {
-            const response = await fetch(`http://localhost:8000/api/users/${deletingUser.id}`, {
+            const response = await fetch(`${API_URL}/users/${deletingUser.id}`, {
                 method: 'DELETE',
                 headers: { 'Authorization': `Bearer ${token}` }
             })
@@ -115,7 +157,7 @@ export default function UserManagementPage() {
         if (!editingUser) return
         setActionLoading(true)
         try {
-            const response = await fetch(`http://localhost:8000/api/users/${editingUser.id}`, {
+            const response = await fetch(`${API_URL}/users/${editingUser.id}`, {
                 method: 'PUT',
                 headers: {
                     'Authorization': `Bearer ${token}`,
@@ -145,6 +187,22 @@ export default function UserManagementPage() {
         const matchesRole = roleFilter === 'all' || user.role === roleFilter
         return matchesSearch && matchesRole
     })
+
+    const getRoleBadge = (role: string) => {
+        switch (role) {
+            case 'super_admin': return 'bg-purple-100 text-purple-700'
+            case 'school_admin': return 'bg-blue-100 text-blue-700'
+            default: return 'bg-gray-100 text-gray-700'
+        }
+    }
+
+    const getRoleLabel = (role: string) => {
+        switch (role) {
+            case 'super_admin': return 'Super Admin'
+            case 'school_admin': return 'School Admin'
+            default: return 'Student'
+        }
+    }
 
     return (
         <div className="min-h-screen">
@@ -179,18 +237,33 @@ export default function UserManagementPage() {
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <div className="flex items-center gap-2 w-full sm:w-auto">
-                        <Filter className="w-4 h-4 text-gray-400" />
-                        <select
-                            className="block w-full sm:w-auto p-2 border border-gray-200 rounded-lg text-sm bg-white"
-                            value={roleFilter}
-                            onChange={(e) => setRoleFilter(e.target.value)}
-                        >
-                            <option value="all">Semua Role</option>
-                            <option value="super_admin">Super Admin</option>
-                            <option value="school_admin">School Admin</option>
-                            <option value="student">Student</option>
-                        </select>
+                    <div className="flex items-center gap-3 w-full sm:w-auto flex-wrap">
+                        <div className="flex items-center gap-2">
+                            <Building2 className="w-4 h-4 text-gray-400" />
+                            <select
+                                className="block p-2 border border-gray-200 rounded-lg text-sm bg-white min-w-[160px]"
+                                value={schoolFilter}
+                                onChange={(e) => setSchoolFilter(e.target.value)}
+                            >
+                                <option value="all">Semua Sekolah</option>
+                                {schools.map((s) => (
+                                    <option key={s.id} value={s.id}>{s.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Filter className="w-4 h-4 text-gray-400" />
+                            <select
+                                className="block p-2 border border-gray-200 rounded-lg text-sm bg-white"
+                                value={roleFilter}
+                                onChange={(e) => setRoleFilter(e.target.value)}
+                            >
+                                <option value="all">Semua Role</option>
+                                <option value="super_admin">Super Admin</option>
+                                <option value="school_admin">School Admin</option>
+                                <option value="student">Student</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -199,22 +272,24 @@ export default function UserManagementPage() {
                     <table className="min-w-full divide-y divide-gray-100">
                         <thead className="bg-gray-50">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">User Info</th>
-                                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Role</th>
-                                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Status</th>
-                                <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase">Tanggal Gabung</th>
-                                <th className="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase">Aksi</th>
+                                <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">User Info</th>
+                                <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Role</th>
+                                <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Sekolah</th>
+                                <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Status</th>
+                                <th className="px-4 py-3 text-left text-xs font-bold text-gray-500 uppercase">Tanggal</th>
+                                <th className="px-4 py-3 text-center text-xs font-bold text-gray-500 uppercase">Aksi</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-100">
                             {isLoading ? (
-                                <tr><td colSpan={5} className="px-6 py-10 text-center text-gray-500">Memuat data...</td></tr>
+                                <tr><td colSpan={6} className="px-6 py-10 text-center text-gray-500">Memuat data...</td></tr>
                             ) : filteredUsers.length === 0 ? (
-                                <tr><td colSpan={5} className="px-6 py-10 text-center text-gray-500">Tidak ada user ditemukan.</td></tr>
+                                <tr><td colSpan={6} className="px-6 py-10 text-center text-gray-500">Tidak ada user ditemukan.</td></tr>
                             ) : (
                                 filteredUsers.map((user) => (
                                     <tr key={user.id} className="hover:bg-gray-50/50 transition-colors">
-                                        <td className="px-6 py-3 whitespace-nowrap">
+                                        {/* User Info */}
+                                        <td className="px-4 py-3 whitespace-nowrap">
                                             <div className="flex items-center">
                                                 <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-xs">
                                                     {user.name.charAt(0).toUpperCase()}
@@ -227,23 +302,44 @@ export default function UserManagementPage() {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-3 whitespace-nowrap">
-                                            <span className={`px-2 py-1 text-xs font-semibold rounded-full 
-                                                ${user.role === 'super_admin' ? 'bg-purple-100 text-purple-700' :
-                                                    user.role === 'school_admin' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'}`}>
-                                                {user.role === 'super_admin' ? 'Super Admin' : user.role === 'school_admin' ? 'School Admin' : 'Student'}
+
+                                        {/* Role */}
+                                        <td className="px-4 py-3 whitespace-nowrap">
+                                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getRoleBadge(user.role)}`}>
+                                                {getRoleLabel(user.role)}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-3 whitespace-nowrap">
+
+                                        {/* Sekolah */}
+                                        <td className="px-4 py-3 whitespace-nowrap">
+                                            {user.school ? (
+                                                <div className="flex items-center">
+                                                    <School className="w-3.5 h-3.5 text-gray-400 mr-1.5" />
+                                                    <span className="text-sm text-gray-700">{user.school.name}</span>
+                                                </div>
+                                            ) : (
+                                                <span className="text-xs text-gray-400">-</span>
+                                            )}
+                                        </td>
+
+                                        {/* Status */}
+                                        <td className="px-4 py-3 whitespace-nowrap">
                                             <span className={`px-2 py-1 text-xs font-semibold rounded-full ${user.is_active !== false ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                                                 {user.is_active !== false ? 'Aktif' : 'Blocked'}
                                             </span>
                                         </td>
-                                        <td className="px-6 py-3 whitespace-nowrap text-xs text-gray-500">
+
+                                        {/* Date */}
+                                        <td className="px-4 py-3 whitespace-nowrap text-xs text-gray-500">
                                             {new Date(user.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                                         </td>
-                                        <td className="px-6 py-3 whitespace-nowrap text-center">
+
+                                        {/* Actions */}
+                                        <td className="px-4 py-3 whitespace-nowrap text-center">
                                             <div className="flex justify-center gap-1">
+                                                <button onClick={() => setSelectedUser(user)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded" title="Detail">
+                                                    <Users className="w-4 h-4" />
+                                                </button>
                                                 <button onClick={() => setEditingUser(user)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded" title="Edit">
                                                     <UserCheck className="w-4 h-4" />
                                                 </button>
@@ -265,6 +361,66 @@ export default function UserManagementPage() {
                     </table>
                 </div>
             </div>
+
+            {/* Quick View Modal */}
+            {selectedUser && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
+                        <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+                            <h3 className="text-lg font-bold text-gray-900">Detail User</h3>
+                            <button onClick={() => setSelectedUser(null)} className="text-gray-400 hover:text-gray-600">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-4">
+                            <div className="flex items-center gap-4">
+                                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold text-2xl">
+                                    {selectedUser.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                    <h4 className="text-xl font-bold text-gray-900">{selectedUser.name}</h4>
+                                    <p className="text-sm text-gray-500">{selectedUser.email}</p>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-gray-50 rounded-lg p-3">
+                                    <p className="text-xs text-gray-500 mb-1">Role</p>
+                                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getRoleBadge(selectedUser.role)}`}>
+                                        {getRoleLabel(selectedUser.role)}
+                                    </span>
+                                </div>
+                                <div className="bg-gray-50 rounded-lg p-3">
+                                    <p className="text-xs text-gray-500 mb-1">Status</p>
+                                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${selectedUser.is_active !== false ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                                        {selectedUser.is_active !== false ? 'Aktif' : 'Blocked'}
+                                    </span>
+                                </div>
+                            </div>
+
+                            {selectedUser.school && (
+                                <div className="bg-blue-50 rounded-lg p-4">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <School className="w-4 h-4 text-blue-600" />
+                                        <span className="text-sm font-semibold text-blue-700">Sekolah</span>
+                                    </div>
+                                    <p className="font-medium text-gray-900">{selectedUser.school.name}</p>
+                                </div>
+                            )}
+
+                            <div className="text-xs text-gray-500">
+                                <Calendar className="w-3 h-3 inline mr-1" />
+                                Bergabung: {new Date(selectedUser.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            </div>
+                        </div>
+                        <div className="p-4 border-t border-gray-100 bg-gray-50">
+                            <button onClick={() => setSelectedUser(null)} className="w-full px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800">
+                                Tutup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Edit Modal */}
             {editingUser && (

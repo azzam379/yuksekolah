@@ -17,10 +17,15 @@ class SchoolController extends Controller
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $status = $request->query('status'); // Filter by status
-        $search = $request->query('search'); // Search by name/email
+        $status = $request->query('status');
+        $search = $request->query('search');
 
-        $query = School::with('admins');
+        $query = School::with(['admins:id,name,email,school_id'])
+            ->withCount([
+                    'registrations',
+                    'registrations as verified_count' => fn($q) => $q->where('status', 'verified'),
+                    'registrations as pending_count' => fn($q) => $q->where('status', 'submitted'),
+                ]);
 
         if ($status) {
             $query->where('status', $status);
@@ -34,6 +39,31 @@ class SchoolController extends Controller
         }
 
         $schools = $query->orderBy('created_at', 'desc')->paginate(20);
+
+        // Add active period and program breakdown for each school
+        $schools->getCollection()->transform(function ($school) {
+            // Get active period
+            $activePeriod = $school->periods()->where('is_open', true)->whereNull('ended_at')->first();
+            $school->active_period = $activePeriod ? [
+                'id' => $activePeriod->id,
+                'name' => $activePeriod->name,
+                'academic_year' => $activePeriod->academic_year,
+            ] : null;
+
+            // Get program breakdown from registrations
+            $programBreakdown = \DB::table('registrations')
+                ->where('school_id', $school->id)
+                ->selectRaw('program, COUNT(*) as count')
+                ->groupBy('program')
+                ->pluck('count', 'program')
+                ->toArray();
+            $school->program_breakdown = $programBreakdown;
+
+            // Get first admin
+            $school->admin = $school->admins->first();
+
+            return $school;
+        });
 
         return response()->json($schools);
     }
