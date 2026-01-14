@@ -255,4 +255,36 @@ class RegistrationController extends Controller
             'file' => $fileRecord
         ], 201);
     }
+
+    // Reset student password (for school admin)
+    public function resetStudentPassword(Request $request, $registrationId)
+    {
+        $user = $request->user();
+
+        if (!$user->isSchoolAdmin()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $registration = Registration::where('id', $registrationId)
+            ->where('school_id', $user->school_id)
+            ->with('student')
+            ->firstOrFail();
+
+        if (!$registration->student) {
+            return response()->json(['error' => 'Student not found'], 404);
+        }
+
+        // Generate new password
+        $newPassword = Str::random(10);
+
+        $registration->student->update([
+            'password' => Hash::make($newPassword)
+        ]);
+
+        return response()->json([
+            'message' => 'Password berhasil direset',
+            'new_password' => $newPassword,
+            'student_name' => $registration->student->name
+        ]);
+    }
 }

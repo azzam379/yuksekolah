@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { Search, Filter, CheckCircle, XCircle, Eye, Mail, Phone, Calendar, X, Check } from 'lucide-react'
+import { Search, Filter, CheckCircle, XCircle, Eye, Mail, Phone, Calendar, X, Check, Key, User, MapPin, GraduationCap, Users } from 'lucide-react'
 
 interface Registration {
     id: number
@@ -23,8 +23,20 @@ interface Registration {
         phone: string
         birth_place?: string
         birth_date?: string
+        gender?: string
         address?: string
+        province?: string
+        city?: string
+        postal_code?: string
         previous_school?: string
+        previous_school_year?: string
+        program?: string
+        father_name?: string
+        father_phone?: string
+        father_job?: string
+        mother_name?: string
+        mother_phone?: string
+        mother_job?: string
     }
     student?: {
         id: number
@@ -54,6 +66,9 @@ export default function StudentsManagementPage() {
 
     // Modal states
     const [selectedReg, setSelectedReg] = useState<Registration | null>(null)
+    const [showDetailModal, setShowDetailModal] = useState(false)
+    const [showResetPasswordModal, setShowResetPasswordModal] = useState(false)
+    const [resetPassword, setResetPassword] = useState('')
     const [actionModal, setActionModal] = useState<{ type: 'verify' | 'reject', reg: Registration } | null>(null)
     const [notes, setNotes] = useState('')
     const [actionLoading, setActionLoading] = useState(false)
@@ -138,6 +153,33 @@ export default function StudentsManagementPage() {
         } finally {
             setActionLoading(false)
         }
+    }
+
+    // Reset student password
+    const handleResetPassword = async () => {
+        if (!selectedReg) return
+        setActionLoading(true)
+        try {
+            const response = await fetch(`${API_URL}/registrations/${selectedReg.id}/reset-password`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            const data = await response.json()
+            if (!response.ok) throw new Error(data.error || 'Gagal reset password')
+            setResetPassword(data.new_password)
+            setMessage({ type: 'success', text: 'Password berhasil direset!' })
+        } catch (error: any) {
+            setMessage({ type: 'error', text: error.message })
+        } finally {
+            setActionLoading(false)
+        }
+    }
+
+    // Open detail modal
+    const openDetailModal = (reg: Registration) => {
+        setSelectedReg(reg)
+        setShowDetailModal(true)
+        setResetPassword('')
     }
 
     const filteredRegs = registrations.filter(reg => {
@@ -273,7 +315,7 @@ export default function StudentsManagementPage() {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex justify-center gap-1">
-                                                <button onClick={() => setSelectedReg(reg)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded" title="Detail">
+                                                <button onClick={() => openDetailModal(reg)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded" title="Detail">
                                                     <Eye className="w-4 h-4" />
                                                 </button>
                                                 {reg.status === 'submitted' && (
@@ -368,6 +410,164 @@ export default function StudentsManagementPage() {
                                     className={`flex-1 py-2 text-white rounded-lg font-medium disabled:opacity-50 ${actionModal.type === 'verify' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'}`}
                                 >
                                     {actionLoading ? 'Memproses...' : actionModal.type === 'verify' ? 'Ya, Verifikasi' : 'Ya, Tolak'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Detail Modal */}
+            {showDetailModal && selectedReg && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl w-full max-w-2xl shadow-xl max-h-[90vh] overflow-y-auto">
+                        <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white">
+                            <h3 className="text-lg font-bold text-gray-900">Detail Data Pendaftar</h3>
+                            <button onClick={() => { setShowDetailModal(false); setSelectedReg(null) }} className="text-gray-400 hover:text-gray-600">
+                                <X className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="p-6 space-y-6">
+                            {/* Status Badge */}
+                            <div className="flex items-center justify-between">
+                                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusBadge(selectedReg.status)}`}>
+                                    {getStatusText(selectedReg.status)}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                    Terdaftar: {new Date(selectedReg.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}
+                                </span>
+                            </div>
+
+                            {/* Data Diri */}
+                            <div className="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                                <h4 className="font-bold text-blue-800 flex items-center gap-2 mb-3">
+                                    <User className="w-4 h-4" /> Data Diri
+                                </h4>
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-500">Nama Lengkap</span><p className="font-medium text-gray-900">{selectedReg.form_data.name}</p></div>
+                                    <div><span className="text-gray-500">Email</span><p className="font-medium text-gray-900">{selectedReg.form_data.email}</p></div>
+                                    <div><span className="text-gray-500">No. HP</span><p className="font-medium text-gray-900">{selectedReg.form_data.phone}</p></div>
+                                    <div><span className="text-gray-500">Jenis Kelamin</span><p className="font-medium text-gray-900">{selectedReg.form_data.gender === 'male' ? 'Laki-laki' : selectedReg.form_data.gender === 'female' ? 'Perempuan' : '-'}</p></div>
+                                    <div><span className="text-gray-500">Tempat Lahir</span><p className="font-medium text-gray-900">{selectedReg.form_data.birth_place || '-'}</p></div>
+                                    <div><span className="text-gray-500">Tanggal Lahir</span><p className="font-medium text-gray-900">{selectedReg.form_data.birth_date || '-'}</p></div>
+                                </div>
+                            </div>
+
+                            {/* Data Pendidikan */}
+                            <div className="bg-purple-50 rounded-xl p-4 border border-purple-100">
+                                <h4 className="font-bold text-purple-800 flex items-center gap-2 mb-3">
+                                    <GraduationCap className="w-4 h-4" /> Data Pendidikan
+                                </h4>
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div><span className="text-gray-500">Program/Jurusan</span><p className="font-medium text-gray-900">{selectedReg.form_data.program || selectedReg.program}</p></div>
+                                    <div><span className="text-gray-500">Tahun Ajaran</span><p className="font-medium text-gray-900">{selectedReg.academic_year}</p></div>
+                                    <div><span className="text-gray-500">Sekolah Asal</span><p className="font-medium text-gray-900">{selectedReg.form_data.previous_school || '-'}</p></div>
+                                    <div><span className="text-gray-500">Tahun Lulus</span><p className="font-medium text-gray-900">{selectedReg.form_data.previous_school_year || '-'}</p></div>
+                                </div>
+                            </div>
+
+                            {/* Alamat */}
+                            <div className="bg-green-50 rounded-xl p-4 border border-green-100">
+                                <h4 className="font-bold text-green-800 flex items-center gap-2 mb-3">
+                                    <MapPin className="w-4 h-4" /> Alamat
+                                </h4>
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                    <div className="col-span-2"><span className="text-gray-500">Alamat Lengkap</span><p className="font-medium text-gray-900">{selectedReg.form_data.address || '-'}</p></div>
+                                    <div><span className="text-gray-500">Provinsi</span><p className="font-medium text-gray-900">{selectedReg.form_data.province || '-'}</p></div>
+                                    <div><span className="text-gray-500">Kota/Kabupaten</span><p className="font-medium text-gray-900">{selectedReg.form_data.city || '-'}</p></div>
+                                    <div><span className="text-gray-500">Kode Pos</span><p className="font-medium text-gray-900">{selectedReg.form_data.postal_code || '-'}</p></div>
+                                </div>
+                            </div>
+
+                            {/* Data Orang Tua */}
+                            <div className="bg-orange-50 rounded-xl p-4 border border-orange-100">
+                                <h4 className="font-bold text-orange-800 flex items-center gap-2 mb-3">
+                                    <Users className="w-4 h-4" /> Data Orang Tua
+                                </h4>
+                                <div className="grid grid-cols-2 gap-6">
+                                    <div className="space-y-2 text-sm">
+                                        <p className="font-semibold text-gray-700">Ayah</p>
+                                        <div><span className="text-gray-500">Nama</span><p className="font-medium text-gray-900">{selectedReg.form_data.father_name || '-'}</p></div>
+                                        <div><span className="text-gray-500">No. HP</span><p className="font-medium text-gray-900">{selectedReg.form_data.father_phone || '-'}</p></div>
+                                        <div><span className="text-gray-500">Pekerjaan</span><p className="font-medium text-gray-900">{selectedReg.form_data.father_job || '-'}</p></div>
+                                    </div>
+                                    <div className="space-y-2 text-sm">
+                                        <p className="font-semibold text-gray-700">Ibu</p>
+                                        <div><span className="text-gray-500">Nama</span><p className="font-medium text-gray-900">{selectedReg.form_data.mother_name || '-'}</p></div>
+                                        <div><span className="text-gray-500">No. HP</span><p className="font-medium text-gray-900">{selectedReg.form_data.mother_phone || '-'}</p></div>
+                                        <div><span className="text-gray-500">Pekerjaan</span><p className="font-medium text-gray-900">{selectedReg.form_data.mother_job || '-'}</p></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Reset Password Section */}
+                            <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                                <h4 className="font-bold text-gray-800 flex items-center gap-2 mb-3">
+                                    <Key className="w-4 h-4" /> Akun Siswa
+                                </h4>
+                                <div className="flex items-center justify-between">
+                                    <div className="text-sm">
+                                        <p className="text-gray-500">Email akun</p>
+                                        <p className="font-medium text-gray-900">{selectedReg.form_data.email}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowResetPasswordModal(true)}
+                                        className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 text-sm font-medium flex items-center gap-2"
+                                    >
+                                        <Key className="w-4 h-4" /> Reset Password
+                                    </button>
+                                </div>
+                                {resetPassword && (
+                                    <div className="mt-4 p-3 bg-green-100 rounded-lg border border-green-200">
+                                        <p className="text-sm text-green-800 font-medium">Password baru:</p>
+                                        <p className="font-mono text-lg text-green-900 select-all">{resetPassword}</p>
+                                        <p className="text-xs text-green-700 mt-1">Salin dan berikan kepada siswa</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                        <div className="p-4 border-t border-gray-100 bg-gray-50">
+                            <button
+                                onClick={() => { setShowDetailModal(false); setSelectedReg(null) }}
+                                className="w-full px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800"
+                            >
+                                Tutup
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Reset Password Confirmation Modal */}
+            {showResetPasswordModal && selectedReg && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
+                    <div className="bg-white rounded-xl w-full max-w-md shadow-xl">
+                        <div className="p-6">
+                            <div className="flex items-center gap-3 mb-4">
+                                <div className="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center">
+                                    <Key className="w-6 h-6 text-yellow-600" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-900">Reset Password?</h3>
+                                    <p className="text-sm text-gray-500">{selectedReg.form_data.name}</p>
+                                </div>
+                            </div>
+                            <p className="text-gray-600 mb-6">
+                                Password lama akan diganti dengan password baru yang digenerate otomatis.
+                            </p>
+                            <div className="flex gap-3">
+                                <button
+                                    onClick={() => setShowResetPasswordModal(false)}
+                                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                                >
+                                    Batal
+                                </button>
+                                <button
+                                    onClick={() => { handleResetPassword(); setShowResetPasswordModal(false) }}
+                                    disabled={actionLoading}
+                                    className="flex-1 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 disabled:opacity-50"
+                                >
+                                    {actionLoading ? 'Mereset...' : 'Ya, Reset Password'}
                                 </button>
                             </div>
                         </div>

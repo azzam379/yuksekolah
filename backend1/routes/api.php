@@ -35,6 +35,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/registrations', [RegistrationController::class, 'index']);
     Route::post('/registrations/{id}/status', [RegistrationController::class, 'updateStatus']);
     Route::post('/registrations/{id}/upload', [RegistrationController::class, 'uploadFile']);
+    Route::post('/registrations/{id}/reset-password', [RegistrationController::class, 'resetStudentPassword']);
 
     // Registration Periods (school_admin)
     Route::prefix('periods')->group(function () {
