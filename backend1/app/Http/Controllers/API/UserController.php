@@ -80,11 +80,19 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if (!$request->user()->isSuperAdmin()) {
+        $user = User::findOrFail($id);
+
+        // Authorization check
+        if ($request->user()->isSuperAdmin()) {
+            // Super Admin can update anyone
+        } elseif ($request->user()->isSchoolAdmin()) {
+            // School Admin can only update students from their school
+            if (!$user->isStudent() || $user->school_id !== $request->user()->school_id) {
+                return response()->json(['error' => 'Unauthorized: Can only update students from your school'], 403);
+            }
+        } else {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
-
-        $user = User::findOrFail($id);
 
         $validated = $request->validate([
             'name' => 'sometimes|string|max:255',
@@ -106,16 +114,25 @@ class UserController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        if (!$request->user()->isSuperAdmin()) {
+        $user = User::findOrFail($id);
+
+        // Authorization check
+        if ($request->user()->isSuperAdmin()) {
+            // Super Admin can delete anyone (except self)
+        } elseif ($request->user()->isSchoolAdmin()) {
+            // School Admin can only delete students from their school
+            if (!$user->isStudent() || $user->school_id !== $request->user()->school_id) {
+                return response()->json(['error' => 'Unauthorized: Can only delete students from your school'], 403);
+            }
+        } else {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Prevent self-deletion
+        // Prevent self-deletion (redundant for School Admin deleting Student, but good for Super Admin)
         if ($request->user()->id == $id) {
             return response()->json(['error' => 'Cannot delete yourself'], 422);
         }
 
-        $user = User::findOrFail($id);
         $userName = $user->name;
 
         // Delete associated tokens

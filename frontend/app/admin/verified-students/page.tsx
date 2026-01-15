@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { Search, Filter, CheckCircle, XCircle, Eye, Mail, Phone, Calendar, X, Check, User, MapPin, GraduationCap } from 'lucide-react'
+import { Search, Filter, CheckCircle, XCircle, Eye, Mail, Phone, Calendar, X, Check, User, MapPin, GraduationCap, Edit, Trash2, Key, AlertTriangle } from 'lucide-react'
 
 interface Registration {
     id: number
@@ -64,6 +64,15 @@ export default function VerifiedStudentsPage() {
     // Modal states
     const [selectedReg, setSelectedReg] = useState<Registration | null>(null)
     const [showDetailModal, setShowDetailModal] = useState(false)
+    const [showEditEmailModal, setShowEditEmailModal] = useState(false)
+    const [showDeleteModal, setShowDeleteModal] = useState(false)
+    const [showResetPasswordModal, setShowResetPasswordModal] = useState(false)
+
+    // Action states
+    const [newEmail, setNewEmail] = useState('')
+    const [resetPasswordResult, setResetPasswordResult] = useState<string | null>(null)
+    const [processing, setProcessing] = useState(false)
+    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'
 
@@ -100,9 +109,6 @@ export default function VerifiedStudentsPage() {
             })
             if (response.ok) {
                 const data = await response.json()
-                // Filter only verified manually if API doesn't support status param yet
-                // But assuming we will filter client side if needed or update API
-                // Let's filter client side for safety first since we use same endpoint
                 const allRegs = data.data || []
                 const verifiedOnly = allRegs.filter((r: Registration) => r.status === 'verified')
                 setRegistrations(verifiedOnly)
@@ -121,10 +127,111 @@ export default function VerifiedStudentsPage() {
         }
     }, [token, periodFilter])
 
-    // Open detail modal
+    // Modals Handlers
     const openDetailModal = (reg: Registration) => {
         setSelectedReg(reg)
         setShowDetailModal(true)
+    }
+
+    const openEditEmailModal = (reg: Registration) => {
+        setSelectedReg(reg)
+        setNewEmail(reg.student?.email || reg.form_data.email)
+        setMessage(null)
+        setShowEditEmailModal(true)
+    }
+
+    const openDeleteModal = (reg: Registration) => {
+        setSelectedReg(reg)
+        setShowDeleteModal(true)
+    }
+
+    const openResetPasswordModal = (reg: Registration) => {
+        setSelectedReg(reg)
+        setResetPasswordResult(null)
+        setShowResetPasswordModal(true)
+    }
+
+    const handleUpdateEmail = async (e: React.FormEvent) => {
+        e.preventDefault()
+        if (!selectedReg || !selectedReg.student) return
+
+        setProcessing(true)
+        try {
+            const response = await fetch(`${API_URL}/users/${selectedReg.student.id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ email: newEmail, name: selectedReg.student.name })
+            })
+
+            if (response.ok) {
+                await fetchVerifiedStudents()
+                setShowEditEmailModal(false)
+                // Show global toast or success message
+            } else {
+                const data = await response.json()
+                setMessage({ type: 'error', text: data.message || 'Gagal update email.' })
+            }
+        } catch (error) {
+            setMessage({ type: 'error', text: 'Terjadi kesalahan jaringan.' })
+        } finally {
+            setProcessing(false)
+        }
+    }
+
+    const handleDeleteAccount = async () => {
+        if (!selectedReg || !selectedReg.student) return
+
+        setProcessing(true)
+        try {
+            const response = await fetch(`${API_URL}/users/${selectedReg.student.id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+
+            if (response.ok) {
+                await fetchVerifiedStudents()
+                setShowDeleteModal(false)
+            } else {
+                const data = await response.json()
+                setMessage({ type: 'error', text: data.message || 'Gagal menghapus akun.' })
+            }
+        } catch (error) {
+            setMessage({ type: 'error', text: 'Terjadi kesalahan jaringan.' })
+        } finally {
+            setProcessing(false)
+        }
+    }
+
+    const handleResetPassword = async () => {
+        if (!selectedReg) return
+
+        setProcessing(true)
+        try {
+            const response = await fetch(`${API_URL}/registrations/${selectedReg.id}/reset-password`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+
+            const data = await response.json()
+
+            if (response.ok) {
+                setResetPasswordResult(data.new_password)
+            } else {
+                alert(data.message || 'Gagal mereset password')
+            }
+        } catch (error) {
+            console.error('Error resetting password:', error)
+            alert('Terjadi kesalahan saat mereset password')
+        } finally {
+            setProcessing(false)
+        }
     }
 
     const filteredRegs = registrations.filter(reg => {
@@ -139,7 +246,7 @@ export default function VerifiedStudentsPage() {
         <div className="min-h-screen animate-fade-in-up">
             <div className="mb-6">
                 <h1 className="text-2xl font-bold text-gray-900">Siswa Aktif (Terverifikasi)</h1>
-                <p className="text-gray-600">Daftar siswa yang telah resmi diterima.</p>
+                <p className="text-gray-600">Daftar siswa yang telah resmi diterima dan manajemen akun.</p>
             </div>
 
             {/* Filters */}
@@ -181,7 +288,7 @@ export default function VerifiedStudentsPage() {
                                 <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Program</th>
                                 <th className="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tanggal Diterima</th>
                                 <th className="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase tracking-wider">Status</th>
-                                <th className="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase">Aksi</th>
+                                <th className="px-6 py-3 text-center text-xs font-bold text-gray-500 uppercase">Aksi Akun</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-100">
@@ -219,9 +326,18 @@ export default function VerifiedStudentsPage() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="flex justify-center gap-1">
-                                                <button onClick={() => openDetailModal(reg)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded" title="Detail">
+                                            <div className="flex justify-center gap-2">
+                                                <button onClick={() => openDetailModal(reg)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded bg-blue-50/50" title="Detail Data">
                                                     <Eye className="w-4 h-4" />
+                                                </button>
+                                                <button onClick={() => openEditEmailModal(reg)} className="p-1.5 text-amber-600 hover:bg-amber-50 rounded bg-amber-50/50" title="Edit Email/Akun">
+                                                    <Edit className="w-4 h-4" />
+                                                </button>
+                                                <button onClick={() => openResetPasswordModal(reg)} className="p-1.5 text-indigo-600 hover:bg-indigo-50 rounded bg-indigo-50/50" title="Reset Password">
+                                                    <Key className="w-4 h-4" />
+                                                </button>
+                                                <button onClick={() => openDeleteModal(reg)} className="p-1.5 text-red-600 hover:bg-red-50 rounded bg-red-50/50" title="Hapus Akun">
+                                                    <Trash2 className="w-4 h-4" />
                                                 </button>
                                             </div>
                                         </td>
@@ -293,6 +409,112 @@ export default function VerifiedStudentsPage() {
                                 Tutup
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Email Modal */}
+            {showEditEmailModal && selectedReg && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl w-full max-w-md shadow-xl p-6">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4">Edit Akun Siswa</h3>
+                        {message && message.type === 'error' && (
+                            <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">{message.text}</div>
+                        )}
+                        <form onSubmit={handleUpdateEmail}>
+                            <div className="mb-4">
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Email Akun</label>
+                                <input
+                                    type="email"
+                                    value={newEmail}
+                                    onChange={(e) => setNewEmail(e.target.value)}
+                                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-amber-500"
+                                    required
+                                />
+                                <p className="text-xs text-gray-500 mt-1">Mengubah email akan mengubah cara siswa login.</p>
+                            </div>
+                            <div className="flex justify-end gap-2">
+                                <button type="button" onClick={() => setShowEditEmailModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Batal</button>
+                                <button type="submit" disabled={processing} className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50">
+                                    {processing ? 'Menyimpan...' : 'Simpan Perubahan'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
+
+            {/* Delete Confirmation Modal */}
+            {showDeleteModal && selectedReg && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl w-full max-w-md shadow-xl p-6">
+                        <div className="flex items-center gap-3 text-red-600 mb-4">
+                            <AlertTriangle className="w-6 h-6" />
+                            <h3 className="text-lg font-bold">Hapus Akun Siswa?</h3>
+                        </div>
+                        <p className="text-gray-600 mb-6">
+                            Apakah Anda yakin ingin menghapus akun siswa <strong>{selectedReg.student?.name}</strong>?
+                            Tindakan ini tidak dapat dibatalkan. Data pendaftaran mungkin masih tersimpan tetapi akun login akan hilang.
+                        </p>
+                        {message && message.type === 'error' && (
+                            <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg text-sm">{message.text}</div>
+                        )}
+                        <div className="flex justify-end gap-2">
+                            <button type="button" onClick={() => setShowDeleteModal(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">Batal</button>
+                            <button type="button" onClick={handleDeleteAccount} disabled={processing} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50">
+                                {processing ? 'Menghapus...' : 'Ya, Hapus Akun'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Reset Password Modal */}
+            {showResetPasswordModal && selectedReg && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl w-full max-w-md shadow-xl p-6">
+                        <h3 className="text-lg font-bold text-gray-900 mb-4">Reset Password Siswa</h3>
+
+                        {!resetPasswordResult ? (
+                            <>
+                                <p className="text-gray-600 mb-6">
+                                    Apakah Anda yakin ingin mereset password untuk siswa <strong>{selectedReg.student?.name}</strong>?
+                                    Password baru akan digenerate secara otomatis.
+                                </p>
+                                <div className="flex justify-end gap-3">
+                                    <button
+                                        onClick={() => setShowResetPasswordModal(false)}
+                                        className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                    >
+                                        Batal
+                                    </button>
+                                    <button
+                                        onClick={handleResetPassword}
+                                        disabled={processing}
+                                        className="px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors disabled:opacity-50"
+                                    >
+                                        {processing ? 'Memproses...' : 'Reset Password'}
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="text-center">
+                                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <Check className="w-6 h-6 text-green-600" />
+                                </div>
+                                <h4 className="text-lg font-bold text-gray-900 mb-2">Reset Berhasil!</h4>
+                                <p className="text-sm text-gray-500 mb-4">Password baru siswa adalah:</p>
+                                <div className="bg-gray-100 p-3 rounded-lg font-mono text-lg font-bold tracking-wider select-all mb-6 text-center border border-gray-200">
+                                    {resetPasswordResult}
+                                </div>
+                                <button
+                                    onClick={() => setShowResetPasswordModal(false)}
+                                    className="w-full px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors"
+                                >
+                                    Tutup
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

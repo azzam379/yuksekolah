@@ -55,16 +55,25 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('/{id}/regenerate-link', [SchoolController::class, 'regenerateLink']);
     });
 
+    // School Admin Settings
+    Route::prefix('settings')->group(function () {
+        Route::get('/', [\App\Http\Controllers\API\SettingsController::class, 'index']);
+        Route::put('/password', [\App\Http\Controllers\API\SettingsController::class, 'updatePassword']);
+        Route::post('/maintenance', [\App\Http\Controllers\API\SettingsController::class, 'toggleMaintenance']);
+    });
+
+    // User Management (Controller handles authorization)
+    Route::put('/users/{id}', [\App\Http\Controllers\API\UserController::class, 'update']);
+    Route::delete('/users/{id}', [\App\Http\Controllers\API\UserController::class, 'destroy']);
+    Route::get('/users', [\App\Http\Controllers\API\UserController::class, 'index'])->middleware('check.superadmin'); // List all users still superadmin only
+
     // Super admin only routes
     Route::middleware(['check.superadmin'])->group(function () {
         Route::get('/schools', [SchoolController::class, 'index'])->middleware('check.superadmin');
         Route::post('/schools/{id}/verify', [SchoolController::class, 'verify'])->middleware('check.superadmin');
         Route::post('/schools/{id}/reject', [SchoolController::class, 'reject'])->middleware('check.superadmin');
 
-        // User Management
-        Route::get('/users', [\App\Http\Controllers\API\UserController::class, 'index']);
-        Route::put('/users/{id}', [\App\Http\Controllers\API\UserController::class, 'update']);
-        Route::delete('/users/{id}', [\App\Http\Controllers\API\UserController::class, 'destroy']);
+        // Block and Password Reset specific actions
         Route::post('/users/{id}/block', [\App\Http\Controllers\API\UserController::class, 'toggleBlock']);
         Route::post('/users/{id}/reset-password', [\App\Http\Controllers\API\UserController::class, 'resetPassword']);
 

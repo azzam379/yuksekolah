@@ -17,7 +17,8 @@ class School extends Model
         'npsn',
         'status',
         'verified_at',
-        'registration_link'
+        'registration_link',
+        'is_maintenance'
     ];
 
     protected $casts = [
