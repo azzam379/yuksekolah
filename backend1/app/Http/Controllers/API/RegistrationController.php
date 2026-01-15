@@ -197,6 +197,11 @@ class RegistrationController extends Controller
                 $query->where('period_id', $request->period_id);
             }
 
+            // Filter by status if provided
+            if ($request->has('status') && $request->status !== 'all') {
+                $query->where('status', $request->status);
+            }
+
             $registrations = $query->orderBy('created_at', 'desc')->paginate(20);
         } elseif ($user->isStudent()) {
             $registrations = $user->registrations()->with('school')->paginate(10);
