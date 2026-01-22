@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowRight, ArrowLeft, CheckCircle, School, User, ShieldCheck, Clock, Check, AlertCircle } from 'lucide-react'
+import { API_URL } from '@/lib/api'
 
 interface FormData {
   school_name: string
@@ -93,7 +94,7 @@ export default function SchoolRegistrationPage() {
     setError('')
 
     try {
-      const response = await fetch('http://localhost:8000/api/register-school', {
+      const response = await fetch(`${API_URL}/register-school`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

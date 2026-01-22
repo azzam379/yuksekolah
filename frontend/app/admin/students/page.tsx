@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Search, Filter, CheckCircle, XCircle, Eye, Mail, Phone, Calendar, X, Check, Key, User, MapPin, GraduationCap, Users } from 'lucide-react'
+import { API_URL } from '@/lib/api'
 
 interface Registration {
     id: number
@@ -62,7 +63,7 @@ export default function StudentsManagementPage() {
     const [periodFilter, setPeriodFilter] = useState('all')
     const [searchTerm, setSearchTerm] = useState('')
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'
+    // API_URL imported from lib
 
     // Modal states
     const [selectedReg, setSelectedReg] = useState<Registration | null>(null)
@@ -131,7 +132,7 @@ export default function StudentsManagementPage() {
         if (!actionModal) return
         setActionLoading(true)
         try {
-            const response = await fetch(`http://localhost:8000/api/registrations/${actionModal.reg.id}/status`, {
+            const response = await fetch(`${API_URL}/registrations/${actionModal.reg.id}/status`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`,

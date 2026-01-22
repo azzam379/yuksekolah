@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Search, Filter, Shield, Mail, UserCheck, Trash2, Key, Ban, X, Check, School, Users, Calendar, Building2 } from 'lucide-react'
+import { API_URL } from '@/lib/api'
 
 interface UserSchool {
     id: number
@@ -43,7 +44,7 @@ export default function UserManagementPage() {
     const [actionLoading, setActionLoading] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'
+    // API_URL imported from lib
 
     const fetchSchools = async () => {
         try {

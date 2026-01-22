@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import { LogOut, GraduationCap, MapPin, Phone, Mail, User, Clock, FileText, CheckCircle, AlertCircle, HelpCircle } from 'lucide-react'
 import Link from 'next/link'
+import { API_URL } from '@/lib/api'
 import Logo from '@/app/components/Logo'
 
 interface School {
@@ -60,13 +61,13 @@ function StudentDashboardContent() {
         // Try multiple endpoints if one fails
         let response;
         try {
-          response = await fetch('http://localhost:8000/api/dashboard/student', {
+          response = await fetch(`${API_URL}/dashboard/student`, {
             headers: { 'Authorization': `Bearer ${token}` }
           })
         } catch (err) {
           console.log('Primary endpoint failed, trying fallback...')
           // Fallback: get user data and simulate registration
-          response = await fetch('http://localhost:8000/api/me', {
+          response = await fetch(`${API_URL}/me`, {
             headers: { 'Authorization': `Bearer ${token}` }
           })
         }

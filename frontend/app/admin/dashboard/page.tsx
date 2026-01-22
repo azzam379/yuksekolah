@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Users, UserPlus, Calendar, ArrowRight, TrendingUp, Link2, Copy, Check, AlertTriangle, CalendarX, ExternalLink } from 'lucide-react'
 import Link from 'next/link'
+import { API_URL } from '@/lib/api'
 
 interface ActivePeriod {
   id: number
@@ -36,7 +37,7 @@ export default function SchoolAdminDashboard() {
   const [showEndModal, setShowEndModal] = useState(false)
   const [endingPeriod, setEndingPeriod] = useState(false)
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'
+  // API_URL imported from lib
 
   useEffect(() => {
     if (!token) return

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Search, Filter, CheckCircle, XCircle, Eye, Mail, Phone, Calendar, X, Check, User, MapPin, GraduationCap, Edit, Trash2, Key, AlertTriangle } from 'lucide-react'
+import { API_URL } from '@/lib/api'
 
 interface Registration {
     id: number
@@ -74,7 +75,7 @@ export default function VerifiedStudentsPage() {
     const [processing, setProcessing] = useState(false)
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null)
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'
+    // API_URL imported from lib
 
     // Fetch periods for filter dropdown
     const fetchPeriods = async () => {

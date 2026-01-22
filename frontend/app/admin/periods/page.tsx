@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Plus, X, CalendarDays, Users, Link2, Copy, Check, ToggleLeft, ToggleRight, Trash2, Edit, RefreshCw, AlertTriangle } from 'lucide-react'
+import { API_URL } from '@/lib/api'
 
 interface Period {
     id: number
@@ -40,7 +41,7 @@ export default function PeriodsPage() {
         is_open: true
     })
 
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'
+    // API_URL imported from lib
 
     const fetchPeriods = async () => {
         try {
