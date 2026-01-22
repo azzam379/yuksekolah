@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+export const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://azzam0-yuksekolah-api.hf.space/api';
 
 // Helper function untuk handle API responses
 async function handleResponse(response: Response) {

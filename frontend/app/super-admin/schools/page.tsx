@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { Search, Filter, School, CheckCircle2, XCircle, Clock, ExternalLink, Users, Calendar, X, User } from 'lucide-react'
+import { API_URL } from '@/lib/api'
 
 interface Admin {
     id: number
@@ -37,8 +38,6 @@ export default function SchoolManagementPage() {
     const [searchTerm, setSearchTerm] = useState('')
     const [statusFilter, setStatusFilter] = useState('all')
     const [selectedSchool, setSelectedSchool] = useState<School | null>(null)
-
-    const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'
 
     useEffect(() => {
         const fetchSchools = async () => {

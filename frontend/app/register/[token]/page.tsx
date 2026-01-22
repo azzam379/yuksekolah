@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { useAuth } from '@/contexts/AuthContext'
 import { ArrowLeft, ArrowRight, User, BookOpen, MapPin, Users, CheckCircle, GraduationCap, AlertCircle, Clock, ShieldCheck, Check } from 'lucide-react'
+import { API_URL } from '@/lib/api'
 import { PROVINCES, getCitiesByProvince, getProvinceName, getCityName } from '@/lib/indonesia-regions'
 
 interface PeriodInfo {
@@ -104,7 +105,7 @@ function StudentRegistrationContent() {
     const fetchPeriodInfo = async () => {
       try {
         setIsLoading(true)
-        const response = await fetch(`http://localhost:8000/api/period-by-link/${token}`)
+        const response = await fetch(`${API_URL}/period-by-link/${token}`)
 
         if (!response.ok) {
           if (response.status === 404) {
@@ -221,7 +222,7 @@ function StudentRegistrationContent() {
     setError('')
 
     try {
-      const response = await fetch('http://localhost:8000/api/submit-registration', {
+      const response = await fetch(`${API_URL}/submit-registration`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -266,7 +267,7 @@ function StudentRegistrationContent() {
 
       // Auto login logic (optional, preserved from original)
       try {
-        const loginResponse = await fetch('http://localhost:8000/api/login', {
+        const loginResponse = await fetch(`${API_URL}/login`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

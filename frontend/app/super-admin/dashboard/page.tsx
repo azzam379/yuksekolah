@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { API_URL } from '@/lib/api'
 import {
   Building2,
   Hourglass,
@@ -52,7 +53,7 @@ export default function SuperAdminDashboard() {
         setIsLoading(true)
 
         // Fetch stats
-        const statsResponse = await fetch('http://localhost:8000/api/dashboard/super-admin', {
+        const statsResponse = await fetch(`${API_URL}/dashboard/super-admin`, {
           headers: {
             'Authorization': `Bearer ${token}`
           }
@@ -99,7 +100,7 @@ export default function SuperAdminDashboard() {
         ? { notes: 'Verified by super admin' }
         : { reason: 'Rejected by super admin' }
 
-      const response = await fetch(`http://localhost:8000/api/schools/${selectedSchool.id}/${endpoint}`, {
+      const response = await fetch(`${API_URL}/schools/${selectedSchool.id}/${endpoint}`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { User, Lock, Settings, Save, AlertTriangle } from 'lucide-react'
+import { API_URL } from '@/lib/api'
 
 export default function SettingsPage() {
     const { user, token } = useAuth()
@@ -29,7 +30,7 @@ export default function SettingsPage() {
     useEffect(() => {
         const fetchSettings = async () => {
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/settings`, {
+                const response = await fetch(`${API_URL}/settings`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 })
                 if (response.ok) {
@@ -66,7 +67,7 @@ export default function SettingsPage() {
         setMessage(null)
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/settings/password`, {
+            const response = await fetch(`${API_URL}/settings/password`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -97,7 +98,7 @@ export default function SettingsPage() {
     const handleMaintenanceToggle = async () => {
         setIsLoading(true)
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api'}/settings/maintenance`, {
+            const response = await fetch(`${API_URL}/settings/maintenance`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${token}`
